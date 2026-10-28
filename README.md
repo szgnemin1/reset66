@@ -1,12 +1,18 @@
 # Reset66 — 66 Günlük Alışkanlık & Yaşam Dönüşümü RYO (Life Reset Açık Kaynak)
 
-[![Build Reset66 Android APK](https://github.com/emins/reset66/actions/workflows/build-apk.yml/badge.svg)](https://github.com/emins/reset66/actions/workflows/build-apk.yml)
+[![Build Reset66 Android APK](https://github.com/szgnemin1/reset66/actions/workflows/build-apk.yml/badge.svg)](https://github.com/szgnemin1/reset66/actions/workflows/build-apk.yml)
+[![GitHub Release](https://img.shields.io/github/v/release/szgnemin1/reset66?color=cyan&label=Latest%20Release)](https://github.com/szgnemin1/reset66/releases/latest)
 [![Platform: Android](https://img.shields.io/badge/Platform-Android_8.0+-3DDC84.svg?logo=android&logoColor=white)](https://android.com)
 [![Capacitor: 6.x](https://img.shields.io/badge/Capacitor-6.x-119EFF.svg?logo=capacitor&logoColor=white)](https://capacitorjs.com)
 [![License: GPL-3.0](https://img.shields.io/badge/License-GPL--3.0-blue.svg)](LICENSE)
 [![No Cloud / 100% Offline](https://img.shields.io/badge/Cloud-100%25_Offline-success.svg)](README.md)
 
 **Reset66**, 1.5 milyondan fazla kullanıcıya sahip popüler alışkanlık uygulaması **Life Reset: 66 Day Habit (Rise)**'in açık kaynaklı, reklamsız, sunucusuz ve F-Droid / GitHub standartlarında tam bağımsız bir Android RYO (RPG) sürümüdür.
+
+### 📥 Doğrudan İndirme (Android APK)
+En güncel kararlı sürümü telefonunuza tek tıkla indirin:
+* **[Reset66 v1.1.0 APK İndir (GitHub Release)](https://github.com/szgnemin1/reset66/releases/download/v1.1.0/app-debug.apk)**
+* Bilimsel altyapı ve hakemli makale incelemeleri için: **[SCIENTIFIC_FOUNDATIONS.md](SCIENTIFIC_FOUNDATIONS.md)**
 
 ---
 
