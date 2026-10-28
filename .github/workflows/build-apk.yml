@@ -8,6 +8,9 @@ on:
     branches: [ "main", "master" ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build-apk:
     name: Build Android APK
@@ -30,9 +33,6 @@ jobs:
           java-version: '17'
           cache: 'gradle'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
       - name: Install NPM Dependencies
         run: |
           npm ci || npm install
@@ -52,6 +52,8 @@ jobs:
           fi
 
       - name: Build Debug APK with Gradle
+        env:
+          ANDROID_HOME: /usr/local/lib/android/sdk
         run: |
           cd android
           chmod +x gradlew
