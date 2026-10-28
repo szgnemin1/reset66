@@ -1,0 +1,21 @@
+{
+  "appId": "com.reset66.lifereset.rpg",
+  "appName": "Reset66 Life Reset",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": true,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": false,
+    "backgroundColor": "#090D16"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 1200,
+      "backgroundColor": "#090D16",
+      "showSpinner": false
+    }
+  }
+}

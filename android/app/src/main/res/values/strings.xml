@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Reset66 Life Reset</string>
+    <string name="title_activity_main">Reset66 Life Reset</string>
+    <string name="package_name">com.reset66.lifereset.rpg</string>
+    <string name="custom_url_scheme">com.reset66.lifereset.rpg</string>
+</resources>

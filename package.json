@@ -1,0 +1,35 @@
+{
+  "name": "reset66-lifereset-android",
+  "version": "2.0.0",
+  "description": "Reset66 — 66-Day Habit Formation RPG (Open Source Android Life Reset Clone)",
+  "main": "www/index.html",
+  "scripts": {
+    "build": "echo 'Static assets ready in www/'",
+    "cap:add:android": "npx cap add android",
+    "cap:sync": "npx cap sync android",
+    "cap:open": "npx cap open android",
+    "cap:run": "npx cap run android"
+  },
+  "keywords": [
+    "life-reset",
+    "habit-rpg",
+    "android",
+    "f-droid",
+    "health-connect",
+    "gamification"
+  ],
+  "author": "Reset66 Community",
+  "license": "GPL-3.0",
+  "dependencies": {
+    "@capacitor/android": "^6.1.2",
+    "@capacitor/app": "^6.0.2",
+    "@capacitor/core": "^6.2.0",
+    "@capacitor/haptics": "^6.0.2",
+    "@capacitor/status-bar": "^6.0.2",
+    "@capacitor-community/keep-awake": "^5.0.1",
+    "@capacitor-community/bluetooth-le": "^6.1.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.2.0"
+  }
+}
