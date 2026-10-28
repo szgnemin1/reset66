@@ -379,6 +379,18 @@
         </div>
 
         <!-- 6 Pillars Stat Grid -->
+        
+        <!-- Daily Neuroscience Protocol Ticker -->
+        <div class="mt-3 p-2.5 rounded-xl bg-cyan-950/30 border border-cyan-500/30 flex items-center gap-2.5 shadow-inner">
+          <span class="text-sm shrink-0">🧠</span>
+          <div class="min-w-0 flex-1">
+            <span class="text-[9px] font-mono font-bold text-cyan-400 uppercase tracking-widest block">[ GÜNÜN NÖROBİLİM PROTOKOLÜ ]</span>
+            <p id="dailyNeuroTipText" class="text-[11px] text-cyan-200 font-medium truncate sm:whitespace-normal leading-tight">
+              Lally (UCL 2010): İlk gün sürtünme katsayısı en yüksektir. Eyleme geçmek bitirmekten zordur.
+            </p>
+          </div>
+        </div>
+
         <div id="statsGridContainer" class="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-4 mt-4 border-t border-slate-800/80">
           <!-- Populated dynamically by renderHeaderAndHero -->
         </div>
@@ -500,22 +512,26 @@
             </div>
           </div>
 
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-            <button type="button" class="binaural-btn px-2.5 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 text-xs font-semibold hover:border-purple-500/40 transition text-center" data-binaural="alpha">
-              <span class="block text-[11px] font-bold text-cyan-300">Alfa 10 Hz</span>
-              <span class="text-[9px] text-slate-400">Derin Odak & Akış</span>
+          <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
+            <button type="button" class="binaural-btn px-2 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 text-xs font-semibold hover:border-purple-500/40 transition text-center" data-binaural="alpha">
+              <span class="block text-[10px] font-bold text-cyan-300">Alfa 10 Hz</span>
+              <span class="text-[8px] text-slate-400">Derin Odak</span>
             </button>
-            <button type="button" class="binaural-btn px-2.5 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 text-xs font-semibold hover:border-purple-500/40 transition text-center" data-binaural="theta">
-              <span class="block text-[11px] font-bold text-purple-300">Teta 6 Hz</span>
-              <span class="text-[9px] text-slate-400">Derin Meditasyon</span>
+            <button type="button" class="binaural-btn px-2 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 text-xs font-semibold hover:border-purple-500/40 transition text-center" data-binaural="theta">
+              <span class="block text-[10px] font-bold text-purple-300">Teta 6 Hz</span>
+              <span class="text-[8px] text-slate-400">Meditasyon</span>
             </button>
-            <button type="button" class="noise-btn px-2.5 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 text-xs font-semibold hover:border-pink-500/40 transition text-center" data-noise="pink">
-              <span class="block text-[11px] font-bold text-pink-300">Pembe Gürültü</span>
-              <span class="text-[9px] text-slate-400">Yağmur & Şelale</span>
+            <button type="button" class="binaural-btn px-2 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 text-xs font-semibold hover:border-amber-500/40 transition text-center" data-binaural="gamma">
+              <span class="block text-[10px] font-bold text-amber-300">Gamma 40 Hz</span>
+              <span class="text-[8px] text-slate-400">Zirve Biliş</span>
             </button>
-            <button type="button" class="noise-btn px-2.5 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 text-xs font-semibold hover:border-amber-500/40 transition text-center" data-noise="brown">
-              <span class="block text-[11px] font-bold text-amber-300">Kahverengi Gürültü</span>
-              <span class="text-[9px] text-slate-400">Derin Okyanus / Rüzgar</span>
+            <button type="button" class="noise-btn px-2 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 text-xs font-semibold hover:border-pink-500/40 transition text-center" data-noise="pink">
+              <span class="block text-[10px] font-bold text-pink-300">Pembe</span>
+              <span class="text-[8px] text-slate-400">Yağmur Sesi</span>
+            </button>
+            <button type="button" class="noise-btn px-2 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 text-xs font-semibold hover:border-amber-500/40 transition text-center" data-noise="brown">
+              <span class="block text-[10px] font-bold text-amber-300">Kahverengi</span>
+              <span class="text-[8px] text-slate-400">Okyanus</span>
             </button>
           </div>
 
@@ -533,18 +549,22 @@
             <span class="text-slate-300 font-bold">Nefes Protokolü Seç:</span>
             <span id="medTechniqueLabel" class="text-purple-300 font-bold">Kutu Nefesi (4-4-4-4)</span>
           </div>
-          <div class="grid grid-cols-3 gap-2">
-            <button type="button" class="med-tech-btn p-2 rounded-xl bg-purple-500/20 border border-purple-500/40 text-purple-300 text-xs font-bold text-center transition" data-tech="box">
-              <span class="block">Kutu Nefesi</span>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <button type="button" class="med-tech-btn p-2 rounded-xl bg-purple-500/20 border border-purple-500/40 text-purple-300 text-xs font-bold text-center transition" data-med-tech="box" data-tech="box">
+              <span class="block font-bold">Kutu Nefesi</span>
               <span class="text-[9px] font-normal text-purple-200/70">4-4-4-4 (Odak)</span>
             </button>
-            <button type="button" class="med-tech-btn p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 text-xs font-semibold text-center transition hover:text-white" data-tech="relax">
-              <span class="block">4-7-8 Tekniği</span>
+            <button type="button" class="med-tech-btn p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 text-xs font-semibold text-center transition hover:text-white" data-med-tech="relax" data-tech="relax">
+              <span class="block font-bold">4-7-8 Tekniği</span>
               <span class="text-[9px] font-normal text-slate-500">Uyku & Gevşeme</span>
             </button>
-            <button type="button" class="med-tech-btn p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 text-xs font-semibold text-center transition hover:text-white" data-tech="energy">
-              <span class="block">Wim Hof Tarzı</span>
-              <span class="text-[9px] font-normal text-slate-500">Yüksek Enerji</span>
+            <button type="button" class="med-tech-btn p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 text-xs font-semibold text-center transition hover:text-white" data-med-tech="sigh" data-tech="sigh">
+              <span class="block font-bold text-cyan-300">Fizyolojik Sigh</span>
+              <span class="text-[9px] font-normal text-cyan-200/70">Stanford 2023 (Stres)</span>
+            </button>
+            <button type="button" class="med-tech-btn p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 text-xs font-semibold text-center transition hover:text-white" data-med-tech="energy" data-tech="energy">
+              <span class="block font-bold">Wim Hof Tarzı</span>
+              <span class="text-[9px] font-normal text-slate-500">Yüksek Enerji (PNAS)</span>
             </button>
           </div>
           <p id="medSubLabel" class="text-[11px] text-slate-400 italic">Dört fazlı dengeleyici nefes: Odaklanmayı artırır ve stresi nötralize eder.</p>
@@ -1558,6 +1578,9 @@ jobs:
         } else if (type === 'delta') {
           baseFreq = 110;
           diff = 2;   // Delta: 2Hz
+        } else if (type === 'gamma') {
+          baseFreq = 200;
+          diff = 40;  // 40 Hz Gamma (MIT Tsai 2016 - Zirve Biliş & Nöral Senkronizasyon)
         }
 
         const now = audioCtx.currentTime;
@@ -1711,13 +1734,95 @@ jobs:
     }
 
     // --- STATIC DATA: MANTRAS, BOOKS, BOSSES ---
+    const NEURO_TIPS = [
+      "Lally (UCL 2010): İlk gün sürtünme katsayısı en yüksektir. Eyleme geçmek bitirmekten zordur.",
+      "Huberman: Uyanışın ilk 60 dakikasında güneş ışığı almak gece melatonini garantiye alır.",
+      "Srámek (2000): 60 sn soğuk duş, dopamini %250 artırır ve 3 saat sabit taban çizgisi sunar.",
+      "Nedergaard (Science): Derin uykuda beyin interstisyel alanı %60 genişler ve toksinleri süpürür.",
+      "Balban & Huberman (2023): Çift içe çekiş ve uzun üfleme (Fizyolojik Sigh) stresi anında sıfırlar.",
+      "Schoenfeld: Kas hipertrofisi için setleri tükenişe 1-3 tekrar kala (RPE 8) bitir.",
+      "Clear: Alışkanlık ipucunu ortamda aşırı görünür kıl (örn: su şişesi masanın ortasında).",
+      "Lembke: Telefonu yatak odasından çıkarmak dopamin reseptörlerinin gece dinlenmesini sağlar.",
+      "Newport: Görevler arası geçiş bilişsel kapasiteyi %20 tüketir. Tek bir göreve kilitlen.",
+      "Walker: REM uykusu duygusal travmaları törpüler ve yaratıcı nöral bağları kurar.",
+      "McGonigal: İrade tükenebilir bir kaynak değil, egzersizle güçlenen bir beyin kasıdır.",
+      "Kox (PNAS 2014): Kontrollü hiperventilasyon inflamatuar sitokinleri baskılar.",
+      "Duhigg: Rutini değiştirebilirsin ama ipucu ve ödülü sabit tutmalısın.",
+      "Goggins: %40 bariyerini aş; zihnin bittiğini söylediğinde aslında yolun başındasın.",
+      "Marcus Aurelius: Sabah kalkmakta zorlandığında: Bir insanın yapması gereken işi yapmak için uyanıyorum de.",
+      "Lally (UCL): 16. gün: Alışkanlığın ilk nöral patikaları oluşmaya başladı; direnç kırılıyor.",
+      "Huberman: Kafeini uyandıktan 90-120 dakika sonra tüketmek öğleden sonra çöküşünü önler.",
+      "Attia: VO2 Max seviyen, 10 yıl sonraki hayatta kalma oranının en güçlü tahmincisidir.",
+      "Baumeister: Karar yorgunluğunu önlemek için sabah rutinini önceden otomatize et.",
+      "Lally (UCL): Bir gün kaçırmak eğriyi bozmaz; ertesi gün kesinlikle geri dön.",
+      "Faz 1 Sona Eriyor (Gün 21): Yıkım evresi tamamlandı. Sinaptik filizlenme başlıyor!",
+      "Faz 2 Başlıyor (Gün 22): Yeni nöronal devreler kuruluyor. Ritim kazanma zamanı.",
+      "Cialdini: Kendini 'Avcı' olarak etiketlediğinde beynin bu kimliğe uygun davranır.",
+      "Kahneman: Sistem 1 (otomatik) yavaş yavaş kontrolü Sistem 2'den (çaba) devralıyor.",
+      "Epiktetos: Ne kadar süre bekleyeceksin kendini en iyisine layık görmek için?",
+      "Lally: 26. gün: Günlük sürtünme %35 azaldı. Alışkanlık artık daha tanıdık geliyor.",
+      "Huberman: 40 Hz Gamma ses dalgaları bilişsel bağlanmayı ve mikroglial aktiviteyi uyarır.",
+      "Clear: Sonuçlara değil, süreç kimliğine odaklan. Sen spor yapan bir insansın.",
+      "Doidge (The Brain That Changes Itself): Birlikte ateşlenen nöronlar birlikte bağlanır.",
+      "Lembke: Ucuz dopamin yoksunluğu ilk 2 haftada biter, gerçek hayat renklenmeye başlar.",
+      "Walker: Her gece aynı saatte yatmak sirkadiyen saat genlerini (CLOCK/BMAL1) senkronize eder.",
+      "Schoenfeld: Progresif aşırı yükleme: Her hafta 1 tekrar veya 1 kg ekle.",
+      "Balban: 5 dakikalık nefes seansı günlük kaygıyı %30 azaltır.",
+      "Seneka: İnsan hayal gücünde gerçekte olduğundan daha fazla acı çeker.",
+      "Lally: 35. gün: Yolun yarısını aştın. Otomatizm endeksi (SRHI) %50 barajını geçti.",
+      "Huberman: Sıcak sauna sonrası soğuk duş büyüme hormonu ve ısı şok proteinlerini artırır.",
+      "Goggins: Kimse gelip seni kurtarmayacak. Kendi kurtarıcın ol.",
+      "Newport: Sabah 08:00 - 10:00 arası prefrontal korteksin en keskin olduğu saatlerdir.",
+      "Attia: Kavrama kuvveti (Grip strength) biyolojik yaşlanmanın doğrudan aynasıdır.",
+      "Lally: 40. gün: Davranış artık dirençle değil, ritimle yapılıyor.",
+      "Marcus Aurelius: Bir günün kontrolünü kaybettiğinde hemen kendine dön, ritmi terk etme.",
+      "Lembke: Dopamin dengesi kurulduğunda basit bir yürüyüş bile coşku verir.",
+      "Huberman: Gözlerini ufka odaklamak (panoramik görüş) amigdala stres yanıtını kapatır.",
+      "Faz 2 Sona Eriyor (Gün 44): Nöral devreler kuruldu! Şimdi Kimlik İnşası başlıyor.",
+      "Faz 3 Başlıyor (Gün 45): Efsanevi kimlik evresi. Bu artık bir alışkanlık değil, karakterin.",
+      "Clear: Bir eylemi 45 kez tekrar ettiğinde bilinçaltı direnci sıfırlanır.",
+      "Walker: Uykudan 2 saat önce sıcak duş almak vücut çekirdek sıcaklığını düşürür ve uykuya dalar.",
+      "Lally: 48. gün: Otomatizm plato seviyesine yaklaşıyor. Zihinsel çaba minimumda.",
+      "Kox: Soğuğa verilen nefes tepkisini kontrol eden kişi, hayatın stresini de kontrol eder.",
+      "Schoenfeld: Kas hafızası (myonuclei) bir kez kazanıldığında ömür boyu silinmez.",
+      "Duhigg: Başarı bir dizi keystone (kilit taşı) alışkanlığın yan ürünüdür.",
+      "Goggins: Aynadaki adamla her gece dürüstçe hesaplaş.",
+      "Huberman: Akşam 20:00'den sonra loş kırmızı ışık melatonin baskılanmasını önler.",
+      "Seneka: Yaşam bir savaştır; hazırlıksız yakalananlar ezilir.",
+      "Lally: 55. gün: Otomatizm seviyesi %85. Eski alışkanlık patikaları budanıyor (synaptic pruning).",
+      "Attia: Düşük tempo aerobik egzersiz (Zone 2) mitokondriyal yoğunluğu ikiye katlar.",
+      "Newport: Dijital minimalizm zihninin en derin potansiyelini açığa çıkarır.",
+      "Marcus Aurelius: Geleceği düşünerek bugünün gücünü tüketme.",
+      "Lembke: Zorluktan kaçmayan beyin, zevkten sarhoş olmayan beyindir.",
+      "Lally: 60. gün: Kritik 66 günün eşiğindesin. Nöral otoban tamamlanmak üzere.",
+      "Huberman: Vagus sinirini güçlendiren kişi duygusal fırtınalarda sarsılmaz kalır.",
+      "Clear: Küçük alışkanlıklar birikerek bileşik faiz gibi devasa sonuçlar doğurur.",
+      "Goggins: Zihnin sınırları senin koyduğun sınırlardır.",
+      "Walker: Düzenli uyku DNA onarım mekanizmalarını maksimize eder.",
+      "Lally: 65. gün: Yarın 66 günlük nöral mühür tamamlanıyor. Gurur duy!",
+      "GÜN 66 — NÖROPLASTİSİTE ZAFERİ: Otomatizm tamamlandı! Solo Hunter kimliğin mühürlendi!"
+    ];
     const MANTRA_CARDS = [
       { id: 'c1', category: 'Disiplin', title: 'Kusursuz Gün Diye Bir Şey Yoktur', quote: 'Motivasyon seni başlatır, disiplin ise 66. güne ulaştırır. Bugün küçük de olsa adımını at.', color: 'cyan' },
-      { id: 'c2', category: 'İrade', title: 'Soğuk Suyla Yüzleş', quote: 'Sabah ilk iş zor olanı seçtiğinde, günün geri kalanındaki hiçbir engel seni korkutamaz.', color: 'purple' },
-      { id: 'c3', category: 'Odak', title: 'Ucuz Dopamini Reddet', quote: 'Ekranı her kapattığında beyninin kontrolünü algoritmalardan geri alırsın.', color: 'emerald' },
-      { id: 'c4', category: 'Güç', title: 'Yorgunluk Geçicidir', quote: 'Vücudun pes etmek istediğinde zihnin devreye girer. Bir tekrar daha seni yeni seviyeye taşır.', color: 'amber' },
-      { id: 'c5', category: 'Bilgelik', title: 'Sessizlikte Büyü', quote: 'Günde 15 sayfa okumak yılda 20 kitap eder. Zihnini beslemeden karakterini yükseltemezsin.', color: 'cyan' },
-      { id: 'c6', category: 'Özgüven', title: 'Kendine Verdiğin Sözü Tut', quote: 'Özgüven aynada değil, kimse bakmıyorken tamamladığın günlük görevlerde inşa edilir.', color: 'purple' }
+      { id: 'c2', category: 'İrade', title: 'Soğuk Suyla Yüzleş (Dopamin +%250)', quote: 'Srámek (2000): Soğuk duş dopamin tabanını saatlerce yükseltir. Sabah zor olanı seç, günün efendisi ol.', color: 'purple' },
+      { id: 'c3', category: 'Odak', title: 'Ucuz Dopamini Reddet', quote: 'Lembke: Ekranı her kapattığında beyninin kontrolünü algoritmalardan geri alır, prefrontal korteksini güçlendirirsin.', color: 'emerald' },
+      { id: 'c4', category: 'Güç', title: 'Yorgunluk Zihinsel Bir İllüzyondur', quote: 'Goggins: Vücudun pes etmek istediğinde zihnin devreye girer. Bir tekrar daha seni yeni seviyeye taşır.', color: 'amber' },
+      { id: 'c5', category: 'Bilgelik', title: 'Sessizlikte Büyü (Günde 15 Sayfa)', quote: 'Yılda 20 kitap eder. Zihnini her gün yüksek kalibreli fikirlerle beslemeden karakterini yükseltemezsin.', color: 'cyan' },
+      { id: 'c6', category: 'Özgüven', title: 'Kendine Verdiğin Sözü Tut', quote: 'Özgüven aynada değil, kimse bakmıyorken tamamladığın günlük görevlerde inşa edilir.', color: 'purple' },
+      { id: 'c7', category: 'Stoacılık', title: 'Engel Yolun Kendisidir', quote: 'Marcus Aurelius: Eylemin önündeki engel eylemi ilerletir. Yolun üstündeki engel, yolun ta kendisi olur.', color: 'emerald' },
+      { id: 'c8', category: 'Nöroplastisite', title: 'Lally 66 Gün Kuralı', quote: 'UCL (2010): Bugün hissettiğin zihinsel sürtünme yeni sinapsların örülme sesidir. Asla durma.', color: 'cyan' },
+      { id: 'c9', category: 'Uyku', title: 'BOS Gliyomfatik Sifonu', quote: 'Nedergaard (Science): Derin uyku beynini yıkar. 23:00\'te yatağa girmek yarınki odak kapasiteni garantiye alır.', color: 'purple' },
+      { id: 'c10', category: 'Odak', title: 'Tekil Görev Hükümdarlığı', quote: 'Cal Newport: Aynı anda iki iş yapan adam hiçbir işi yapamaz. Tek bir hedefe kilitlen ve parçala.', color: 'emerald' },
+      { id: 'c11', category: 'İrade', title: 'Tükeniş Bir Sinyaldir, Bitiş Değil', quote: 'Zihinsel bariyer kırıldığında irade kası hipertrofiye uğrar. aMCC bölgesini her gün besle.', color: 'amber' },
+      { id: 'c12', category: 'Canlılık', title: 'Hücresel Hidrasyon', quote: 'Vücudundaki %2\'lik sıvı kaybı bilişsel hızı %15 yavaşlatır. Su iç, hücrelerini canlandır.', color: 'cyan' },
+      { id: 'c13', category: 'Kriz', title: 'Kaos Bir Fırsattır', quote: 'Herkes dağılırken rutinine sadık kalan kişi, zindanı ilk fetheden avcı olur.', color: 'amber' },
+      { id: 'c14', category: 'Zihin', title: 'Nefesini Yönet, Beynini Yönet', quote: 'Balban & Huberman (2023): Uzatılmış nefes verme kalbine yavaşlama emri verir. Sakinleş ve hakim ol.', color: 'purple' },
+      { id: 'c15', category: 'Disiplin', title: 'Standartlar Duyguların Üstündedir', quote: 'Nasıl hissettiğin önemli değil, protokolün neyi emrettiği önemlidir. Duygularını değil, görevini dinle.', color: 'cyan' },
+      { id: 'c16', category: 'Güç', title: 'Mekanik Gerilim Yasası', quote: 'Schoenfeld: Kas da karakter de yalnızca progresif yükleme (progressive overload) altında gelişir.', color: 'amber' },
+      { id: 'c17', category: 'Özgüven', title: 'Yarın Diye Bir Şey Yok', quote: 'Erteleme İblisi\'nin tek silahı "yarın" yalanıdır. Tek gerçek an şimdidir; ilk seti hemen yap.', color: 'purple' },
+      { id: 'c18', category: 'Kimlik', title: 'Gölge Avcısı\'nın Uyanışı', quote: 'Eski tembel kimliğin öldü. 66 günlük nöral mühürle yeni benliğini inşa ediyorsun.', color: 'emerald' },
+      { id: 'c19', category: 'Stoa', title: 'Dış Dünyanın Gürültüsünü Kapat', quote: 'Senka: Dünyayı değiştiremezsin ama zihninin kalesini aşılmaz bir sur haline getirebilirsin.', color: 'cyan' },
+      { id: 'c20', category: 'Zafer', title: '66 Günlük Yeniden Doğuş', quote: 'Bu sadece bir alışkanlık takibi değil, zihninin biyolojisini yeniden programlama operasyonudur.', color: 'amber' }
     ];
 
     const BOOK_SUMMARIES = [
@@ -1726,24 +1831,95 @@ jobs:
         title: 'Atomik Alışkanlıklar',
         author: 'James Clear',
         pillar: 'Disiplin',
-        summary: 'Her gün %1 daha iyi olmak yıl sonunda seni 37 kat ileri taşır. Alışkanlığı görünür, çekici, kolay ve tatmin edici kıl; 2 dakika kuralıyla başla.'
+        badge: 'Nöroplastisite',
+        summary: 'Her gün %1 daha iyi olmak yıl sonunda seni 37 kat ileri taşır. Alışkanlığı görünür, çekici, kolay ve tatmin edici kıl; 2 dakika kuralıyla ilk kıvılcımı çak.'
       },
       {
         id: 'b2',
-        title: 'Pürdikkat (Deep Work)',
-        author: 'Cal Newport',
+        title: 'Dopamin Ulusu',
+        author: 'Dr. Anna Lembke (Stanford)',
         pillar: 'Odak',
-        summary: 'Bölünmüş dikkat zihinsel kapasiteyi eritir. Günde 90 dakikalık bildirimsiz derin odak blokları, 8 saatlik dağınık çalışmadan daha çok değer üretir.'
+        badge: 'Nörokimya',
+        summary: 'Zevk ve acı dengesi aynı tahterevallide çalışır. Sürekli dijital uyarım dopamin tabanını çökertir. 30 günlük dopamin orucu reseptör duyarlılığını onarır.'
       },
       {
         id: 'b3',
-        title: 'Bana Zarar Veremezsin',
-        author: 'David Goggins',
+        title: 'Neden Uyuruz?',
+        author: 'Dr. Matthew Walker (UC Berkeley)',
+        pillar: 'Canlılık',
+        badge: 'Sirkadiyen Biyoloji',
+        summary: '6 saatin altındaki uyku bilişsel kapasiteyi %40 oranında köreltir. Derin uykuda gliyomfatik sistem toksinleri temizler, REM uykusu ise nöral bağlantıları pekiştirir.'
+      },
+      {
+        id: 'b4',
+        title: 'Pürdikkat (Deep Work)',
+        author: 'Cal Newport (Georgetown)',
+        pillar: 'Odak',
+        badge: 'Bilişsel Kapasite',
+        summary: 'Bölünmüş dikkat zihinsel artık (attention residue) bırakır. Günde 90 dakikalık kesintisiz derin odak bloğu, 8 saatlik dağınık çalışmadan daha çok değer üretir.'
+      },
+      {
+        id: 'b5',
+        title: 'Alışkanlıkların Gücü',
+        author: 'Charles Duhigg (Harvard)',
+        pillar: 'Disiplin',
+        badge: 'Bazal Gangliyon',
+        summary: 'Nöral Alışkanlık Döngüsü: İpucu (Cue) -> Rutin (Routine) -> Ödül (Reward). Eski alışkanlığı silemezsin; sadece aynı ipucuna yeni bir rutin bağlayabilirsin.'
+      },
+      {
+        id: 'b6',
+        title: 'Beni İncitemezsin (Can\'t Hurt Me)',
+        author: 'David Goggins (Navy SEAL)',
         pillar: 'İrade',
-        summary: '%40 Kuralı: Zihnin tamamen tükendiğini söylediğinde aslında kapasitenin yalnızca %40’ını kullanmışsındır. Konfor alanını her gün bilerek zorla.'
+        badge: 'Zihinsel Zırh',
+        summary: '%40 Kuralı: Zihnin pes etmeni haykırdığında aslında fizyolojik kapasitenin sadece %40\'ındasındır. Rahatsızlıkla barış ve beynini zorlukla nasırlaştır.'
+      },
+      {
+        id: 'b7',
+        title: 'Kendime Düşünceler (Meditations)',
+        author: 'Marcus Aurelius (Roma İmparatoru)',
+        pillar: 'Zihin',
+        badge: 'Stoacılık',
+        summary: 'Kontrol edemediğin dış olayları değil, kendi tepkilerini yönet. Engel, yolun ta kendisidir. Şikayet etmeyi bırak ve eyleme geç.'
+      },
+      {
+        id: 'b8',
+        title: 'İrade İçgüdüsü',
+        author: 'Dr. Kelly McGonigal (Stanford)',
+        pillar: 'İrade',
+        badge: 'aMCC Gelişimi',
+        summary: 'İrade sonlu bir kaynak değil, geliştirilebilir bir kastır. Soğuk duş ve kontrollü nefes anterior singulat korteksi (aMCC) büyüterek dürtü denetimini artırır.'
+      },
+      {
+        id: 'b9',
+        title: 'Huberman Lab Nörobiyoloji Protokolleri',
+        author: 'Dr. Andrew Huberman (Stanford)',
+        pillar: 'Zihin & Canlılık',
+        badge: 'Otonom Sistem',
+        summary: 'Sabah güneşiyle sirkadiyen ritmi kilitle. Stres anında iki kısa nefes + bir uzun nefes (Fizyolojik İçe Çekiş) ile kalp ritmini saniyeler içinde düşür.'
+      },
+      {
+        id: 'b10',
+        title: 'Outlive: Yaşamın Ötesi',
+        author: 'Dr. Peter Attia (Johns Hopkins)',
+        pillar: 'Güç & Ömür',
+        badge: 'Hücresel Yaşlanma',
+        summary: 'Sağlıklı ömür (Healthspan) için en kritik iki belirteç: VO2 Max ve kas kuvvetidir. Kademeli direnç antrenmanı hücresel yaşlanmayı geciktiren en güçlü biyolojik araçtır.'
       }
     ];
 
+    const BOSS_LORE = [
+      { week: 1, name: 'Atalet Gölgesi', archetype: 'Statik Sürtünme & Harekete Geçememe', desc: 'Lally (UCL 2010): Başlangıç direnci en yüksek seviyededir. 2 dakika kuralıyla ilk kıvılcımı çak.', weakness: 'Küçük Adımlar & İlk Kıvılcım', hp: 300 },
+      { week: 2, name: 'Erteleme İblisi', archetype: 'Zamansal İskonto & Sahte Yarın Algısı', desc: 'Prefrontal korteks ile amigdala çatışması. Uzak ödülleri anlık mikro-XP ile yakınlaştır.', weakness: 'Geri Sayım & Aciliyet Hissi', hp: 450 },
+      { week: 3, name: 'Ucuz Dopamin Ejderi', archetype: 'Tonik Dopamin Tüketimi & Algoritma Tuzağı', desc: 'Dr. Lembke (Stanford): Fazla uyarım dopamin tabanını çökertir. Ekran detoksuyla reseptörleri yenile.', weakness: 'Dopamin Orucu & Gri Ekran', hp: 600 },
+      { week: 4, name: 'Konfor Alanı Gardiyanı', archetype: 'Amigdala Kaçınma Tepkisi', desc: 'Soğuk su ve zorluk anterior singulat korteksi (irade merkezi) büyüterek gardiyanı ezer.', weakness: 'Soğuk Su Şoku & Bilinçli Zorluk', hp: 800 },
+      { week: 5, name: 'Dağınık Zihin Hayaleti', archetype: 'Dikkat Kalıntısı & Çoklu Görev', desc: 'Cal Newport: Görev geçişleri bilişsel artık bırakır. 25 dk tekil Pomodoro ile hayaleti dağıt.', weakness: 'Pürdikkat Odak Blokları', hp: 1050 },
+      { week: 6, name: 'Şüphe Lordu', archetype: 'Sahtekarlık Sendromu & Negatif İç Ses', desc: 'CBT: Şüphe gerçek değil, savunma refleksidir. Yazılı kanıt günlüğüyle gerçeği gör.', weakness: 'Gelişim Günlüğü & Somut Kanıt', hp: 1350 },
+      { week: 7, name: 'Bahane Golemi', archetype: 'Bilişsel Çelişki & Mantığa Bürüme', desc: 'Beyin rahatsızlığı gidermek için bahaneler üretir. Standartların tavizsiz olsun.', weakness: 'Tavizsiz Disiplin & Standartlar', hp: 1700 },
+      { week: 8, name: 'Uykusuzluk Canavarı', archetype: 'Sirkadiyen Ritmin Bozulması', desc: 'Dr. Walker & Nedergaard: Mavi ışık melatonini 2 saat geciktirir. Gliyomfatik temizliği başlat.', weakness: 'Karanlık Oda & Sabit Uyanış', hp: 2100 },
+      { week: 9, name: 'Kaos Şövalyesi', archetype: 'Stres Altında Eski Rutine Dönme', desc: 'Kriz anlarında hedeflerine değil, alışkanlıklarının seviyesine düşersin. Temel çapayı koru.', weakness: 'Temel Alışkanlık Çapaları', hp: 2600 },
+      { week: 10, name: 'Eski Kimlik Kralı', archetype: 'Ego Savunması & Geri Çekilme', desc: 'Otomatizmin son aşaması. Eski tembel kimliğin öldüğü, yeni Solo Hunter kimliğinin doğuşu.', weakness: '66 Günlük Nöral Mühür & Yeniden Doğuş', hp: 3200 }
+    ];
     const BOSS_NAMES = [
       'Atalet Gölgesi', 'Erteleme İblisi', 'Ucuz Dopamin Ejderi',
       'Konfor Alanı Gardiyanı', 'Dağınık Zihin Hayaleti', 'Şüphe Lordu',
@@ -2202,7 +2378,19 @@ jobs:
       // Boss Panel
       const bossIdx = (week - 1) % BOSS_NAMES.length;
       document.getElementById('bossSubtitle').textContent = `${week}. Hafta Zindanı`;
-      document.getElementById('bossNameText').textContent = BOSS_NAMES[bossIdx];
+      const currentBoss = BOSS_LORE[bossIdx] || { name: BOSS_NAMES[bossIdx], archetype: 'Gölge Direnci', desc: 'Patronu yok et.' };
+      document.getElementById('bossNameText').textContent = currentBoss.name;
+      const bossDescEl = document.getElementById('bossStatusMessage');
+      if (bossDescEl) {
+        bossDescEl.textContent = `[${currentBoss.archetype}] ${currentBoss.desc} Zayıflık: ${currentBoss.weakness}`;
+      }
+
+      // Update Daily Neuro Tip Ticker
+      const neuroEl = document.getElementById('dailyNeuroTipText');
+      if (neuroEl) {
+        const tipIdx = Math.max(0, Math.min(65, state.currentDay - 1));
+        neuroEl.textContent = NEURO_TIPS[tipIdx] || NEURO_TIPS[0];
+      }
       document.getElementById('bossHpLabel').textContent = `${state.bossHp} / ${state.bossMaxHp} HP`;
       const bossPct = Math.max(0, Math.min(100, Math.round((state.bossHp / state.bossMaxHp) * 100)));
       document.getElementById('bossHpBarFill').style.width = `${bossPct}%`;
@@ -2455,29 +2643,40 @@ jobs:
     const MED_TECHNIQUES = {
       box: {
         name: 'Kutu Nefesi (Box Breathing) 4-4-4-4',
-        sub: 'Zihinsel Odak & Berraklık',
+        sub: 'Zihinsel Odak & Berraklık (Navy SEALs)',
         phases: [
           { label: 'NEFES AL', sec: 4, action: 'expand', instr: 'Burnundan derin nefes al' },
           { label: 'TUT', sec: 4, action: 'hold', instr: 'Nefesini ciğerlerinde tut' },
           { label: 'NEFES VER', sec: 4, action: 'contract', instr: 'Ağzından yavaşça üfle' },
-          { label: 'BEKLE', sec: 4, action: 'empty', instr: 'Ciğerlerin boş şekilde bekle' }
+          { label: 'TUT', sec: 4, action: 'hold', instr: 'Boş ciğerle sakin kal' }
         ]
       },
-      '478': {
-        name: '4-7-8 Tekniği (Uyku & Rahatlama)',
-        sub: 'Parasempatik Sinir Sistemi Gevşemesi',
+      relax: {
+        name: '4-7-8 Tekniği (Dr. Andrew Weil)',
+        sub: 'Sirkadiyen Gevşeme & Hızlı Uyku',
         phases: [
-          { label: 'NEFES AL', sec: 4, action: 'expand', instr: 'Burnundan 4 saniyede al' },
-          { label: 'TUT', sec: 7, action: 'hold', instr: '7 saniye boyunca tut' },
-          { label: 'NEFES VER', sec: 8, action: 'contract', instr: 'Ağzından 8 saniyede ver' }
+          { label: 'NEFES AL', sec: 4, action: 'expand', instr: 'Burnundan sessizce nefes al' },
+          { label: 'TUT', sec: 7, action: 'hold', instr: 'Nefesi ciğerlerinde tut' },
+          { label: 'NEFES VER', sec: 8, action: 'contract', instr: 'Ağzından seslice nefes ver' }
         ]
       },
-      wimhof: {
-        name: 'Wim Hof Tarzı (Ateş & Enerji)',
-        sub: 'Yüksek Oksijenlenme & İrade Gücü',
+      sigh: {
+        name: 'Fizyolojik İçe Çekiş (Stanford 2023)',
+        sub: 'Anlık Stres Nötralizasyonu & Vagus Frenlemesi (Balban & Huberman)',
         phases: [
-          { label: 'HIZLI AL', sec: 2, action: 'expand', instr: 'Güçlü ve derin nefes al' },
-          { label: 'HIZLI VER', sec: 2, action: 'contract', instr: 'Zorlamadan serbest bırak' }
+          { label: 'BURUNDAN AL', sec: 3, action: 'expand', instr: 'Burnundan derin bir nefes al' },
+          { label: 'TEPE ÇEKİŞ', sec: 1, action: 'expand', instr: 'Hızlıca bir nefes daha ekle (Alveolleri aç)' },
+          { label: 'UZUN NEFES VER', sec: 6, action: 'contract', instr: 'Ağzından yavaşça ve tamamen boşalt' },
+          { label: 'SAKİNLİK', sec: 1, action: 'hold', instr: 'Nötr sakinlikte bekle' }
+        ]
+      },
+      energy: {
+        name: 'Wim Hof Tarzı (PNAS 2014)',
+        sub: 'Hücresel Oksijenasyon & Adrenalin Deşarjı',
+        phases: [
+          { label: 'GÜÇLÜ AL', sec: 2, action: 'expand', instr: 'Göğüs ve karnını tamamen doldur' },
+          { label: 'SERBEST BIRAK', sec: 1, action: 'contract', instr: 'Zorlamadan nefesi bırak' },
+          { label: 'TUT (SONUNDA)', sec: 15, action: 'hold', instr: 'Nefesi tamamen verip tut' }
         ]
       }
     };
@@ -3891,11 +4090,13 @@ jobs:
 
       document.querySelectorAll('.med-tech-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-          medSelectedTechnique = btn.getAttribute('data-med-tech');
+          const rawTech = btn.getAttribute('data-med-tech') || btn.getAttribute('data-tech') || btn.dataset.tech;
+          if (!rawTech || !MED_TECHNIQUES[rawTech]) return;
+          medSelectedTechnique = rawTech;
           document.querySelectorAll('.med-tech-btn').forEach(b => {
-            b.className = 'med-tech-btn w-full p-3 rounded-xl border text-left transition flex items-center justify-between bg-slate-950 border-slate-800 text-slate-300 hover:border-purple-500/40';
+            b.className = 'med-tech-btn p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 text-xs font-semibold text-center transition hover:text-white';
           });
-          btn.className = 'med-tech-btn w-full p-3 rounded-xl border text-left transition flex items-center justify-between bg-purple-500/15 border-purple-500/40 text-white';
+          btn.className = 'med-tech-btn p-2 rounded-xl bg-purple-500/20 border border-purple-500/40 text-purple-300 text-xs font-bold text-center transition';
 
           const tech = MED_TECHNIQUES[medSelectedTechnique];
           document.getElementById('medTechniqueLabel').textContent = tech.name.toUpperCase();
@@ -3924,15 +4125,25 @@ jobs:
       document.querySelectorAll('.binaural-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           const type = btn.getAttribute('data-binaural');
+          if (activeBinauralType === type) {
+            stopBinauralBeats();
+            activeBinauralType = null;
+            document.querySelectorAll('.binaural-btn').forEach(b => {
+              b.className = 'binaural-btn px-2 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 text-xs font-semibold hover:border-purple-500/40 transition text-center';
+            });
+            document.getElementById('binauralStatusText').textContent = 'Binaural: Kapalı';
+            showToast('🎧 Binaural frekans durduruldu.', 'info');
+            return;
+          }
           startBinauralBeats(type);
 
           document.querySelectorAll('.binaural-btn').forEach(b => {
-            b.className = 'binaural-btn py-1.5 rounded-lg font-semibold bg-slate-950 border border-slate-800 text-slate-300 hover:text-white';
+            b.className = 'binaural-btn px-2 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 text-xs font-semibold hover:border-purple-500/40 transition text-center';
           });
-          btn.className = 'binaural-btn py-1.5 rounded-lg font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40';
+          btn.className = 'binaural-btn px-2 py-2 rounded-xl bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 text-xs font-bold transition text-center';
 
           const statusEl = document.getElementById('binauralStatusText');
-          statusEl.textContent = type === 'off' ? 'Kapalı' : `${type.toUpperCase()} Aktif`;
+          statusEl.textContent = type === 'off' ? 'Binaural: Kapalı' : `${type.toUpperCase()} Aktif`;
           if (type !== 'off') {
             showToast(`🎧 ${type.toUpperCase()} Binaural Beats frekansı başlatıldı.`, 'info');
           }
@@ -3942,15 +4153,28 @@ jobs:
       document.querySelectorAll('.noise-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           const type = btn.getAttribute('data-noise');
+          if (activeNoiseType === type) {
+            stopAmbientNoise();
+            activeNoiseType = null;
+            document.querySelectorAll('.noise-btn').forEach(b => {
+              b.className = 'noise-btn px-2 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 text-xs font-semibold hover:border-pink-500/40 transition text-center';
+            });
+            document.getElementById('noiseStatusText').textContent = 'Gürültü: Kapalı';
+            showToast('🌿 Ortam gürültüsü durduruldu.', 'info');
+            return;
+          }
           startAmbientNoise(type);
 
           document.querySelectorAll('.noise-btn').forEach(b => {
-            b.className = 'noise-btn py-1.5 rounded-lg font-semibold bg-slate-950 border border-slate-800 text-slate-300 hover:text-white';
+            b.className = 'noise-btn px-2 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 text-xs font-semibold hover:border-pink-500/40 transition text-center';
           });
-          btn.className = 'noise-btn py-1.5 rounded-lg font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
+          btn.className = 'noise-btn px-2 py-2 rounded-xl bg-pink-500/20 text-pink-300 border border-pink-500/40 text-xs font-bold transition text-center';
 
           const statusEl = document.getElementById('noiseStatusText');
-          statusEl.textContent = type === 'off' ? 'Kapalı' : (type === 'pink' ? 'Pembe Gürültü' : 'Kahverengi Gürültü');
+          statusEl.textContent = type === 'off' ? 'Gürültü: Kapalı' : (type === 'pink' ? 'Pembe Aktif' : 'Kahverengi Aktif');
+          if (type !== 'off') {
+            showToast(`🌿 ${type === 'pink' ? 'Pembe Gürültü' : 'Kahverengi Gürültü'} başlatıldı.`, 'info');
+          }
         });
       });
 
