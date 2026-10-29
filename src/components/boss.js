@@ -1,12 +1,13 @@
 /**
  * Weekly Boss Arena & 66-Day "Don't Break The Chain" (Zinciri Kırma) Map (Tab 2: Boss)
- * Features x2 Enraged Boss Penalty, Heart Shields, and Connected Chain Visualizer.
+ * Features x2 Enraged Boss Penalty, Heart Shields, Co-Op Raid, and Connected Chain Visualizer.
  */
 
 import { getState, updateState, addXP, damageBoss } from '../services/storage.js';
 import { BOSS_LORE } from '../data/constants.js';
 import { triggerHaptic } from '../services/haptics.js';
-import { playBossHitSound, playLevelUpSound } from '../services/audio.js';
+import { playBossHitSound, playLevelUpSound, playClickSound } from '../services/audio.js';
+import { getClassById } from '../data/classes.js';
 
 export function renderBossTab() {
   const state = getState();
@@ -14,6 +15,7 @@ export function renderBossTab() {
   const bossIdx = currentWeek - 1;
   const currentBoss = BOSS_LORE[bossIdx] || BOSS_LORE[0];
   const hpPct = Math.max(0, Math.min(100, Math.round((state.bossHp / state.bossMaxHp) * 100)));
+  const userClass = getClassById(state.userClass);
 
   const heartsHtml = Array(3).fill(0).map((_, i) => {
     const isFull = i < state.hearts;
@@ -34,6 +36,17 @@ export function renderBossTab() {
           </div>
         ` : ''}
 
+        <!-- Co-Op Raid Partner Banner -->
+        ${state.coop?.active ? `
+          <div class="mb-3 p-2.5 rounded-xl bg-purple-950/50 border border-purple-500 text-purple-200 text-xs font-mono flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span>🤝</span>
+              <span><strong>Baskın Ortağı:</strong> ${state.coop.partnerName} (${state.coop.partnerDamage} DMG)</span>
+            </div>
+            <span class="text-cyan-300 font-bold">Ortak Güç 🔥</span>
+          </div>
+        ` : ''}
+
         <!-- Boss Top Header -->
         <div class="flex items-center justify-between pb-3 border-b border-slate-800">
           <div class="flex items-center gap-2.5">
@@ -44,9 +57,12 @@ export function renderBossTab() {
             </div>
           </div>
 
-          <!-- Player Health Hearts -->
+          <!-- Player Health Hearts & Shields -->
           <div class="flex flex-col items-end">
-            <span class="text-[9px] font-mono text-slate-400 font-bold uppercase">AVCI CANI</span>
+            <div class="flex items-center gap-1.5 text-[9px] font-mono text-slate-400 font-bold uppercase">
+              <span>AVCI CANI</span>
+              <span class="text-cyan-400 font-mono">🛡️ ${state.shields || 0}/2 Kalkan</span>
+            </div>
             <div class="flex items-center gap-1 mt-0.5">
               ${heartsHtml}
             </div>
@@ -97,6 +113,19 @@ export function renderBossTab() {
 
         </div>
 
+        <!-- Quick Access RPG Action Pills -->
+        <div class="mt-4 pt-3 border-t border-slate-800/80 grid grid-cols-2 gap-2">
+          <button type="button" id="btnOpenInventoryFromBoss" class="py-2 px-3 rounded-xl bg-slate-950 hover:bg-slate-900 border border-purple-500/40 text-purple-300 text-xs font-mono font-bold flex items-center justify-center gap-1.5 transition">
+            <span>🎒</span>
+            <span>Envanter & Eserler</span>
+          </button>
+          
+          <button type="button" id="btnOpenShareCardFromBoss" class="py-2 px-3 rounded-xl bg-slate-950 hover:bg-slate-900 border border-cyan-500/40 text-cyan-300 text-xs font-mono font-bold flex items-center justify-center gap-1.5 transition">
+            <span>📸</span>
+            <span>Hikaye Kartı Paylaş</span>
+          </button>
+        </div>
+
       </div>
 
       <!-- 66 Günlük "Zinciri Kırma" (Don't Break The Chain) Haritası -->
@@ -118,6 +147,7 @@ export function renderBossTab() {
         <!-- Legend -->
         <div class="flex items-center gap-3 text-[10px] font-mono text-slate-400 flex-wrap">
           <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span> Mühürlendi</span>
+          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span> Kalkan Korudu</span>
           <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block"></span> Kırıldı</span>
           <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-cyan-400 inline-block animate-pulse"></span> Bugün</span>
           <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-slate-800 inline-block"></span> Kilitli</span>
@@ -134,6 +164,9 @@ export function renderBossTab() {
 
             if (status === 'done') {
               nodeClass = 'bg-emerald-500/25 border-emerald-500/60 text-emerald-300 shadow-[0_0_8px_rgba(16,185,129,0.3)]';
+            } else if (status === 'shielded') {
+              nodeClass = 'bg-amber-500/30 border-amber-500/80 text-amber-300 font-bold shadow-[0_0_8px_rgba(245,158,11,0.5)]';
+              iconText = '🛡️';
             } else if (status === 'missed') {
               nodeClass = 'bg-rose-500/30 border-rose-500/80 text-rose-300 line-through shadow-[0_0_8px_rgba(244,63,94,0.4)]';
             } else if (status === 'current') {
@@ -172,11 +205,36 @@ export function attachBossListeners(onUpdate) {
         playLevelUpSound();
         triggerHaptic('success');
         addXP(100, 'STR');
-        alert('🏆 ZAFER! Boss yok edildi! +100 STR XP ve Zafer Rozeti kazandın!');
+
+        if (res.droppedArtifact) {
+          alert(`🏆 ZAFER! Boss yok edildi! +100 STR XP ve EFSANEVİ ESER KAZANILDI: "${res.droppedArtifact.name}"!\n\nEtki: ${res.droppedArtifact.effect}`);
+        } else {
+          alert('🏆 ZAFER! Boss yok edildi! +100 STR XP ve Zafer Rozeti kazandın!');
+        }
       } else {
-        alert(`💥 Boss'a 60 Hasar vuruldu! Kalan Boss Canı: ${res.newHp} HP`);
+        alert(`💥 Boss'a ${res.damageDealt} Hasar vuruldu! Kalan Boss Canı: ${res.newHp} HP`);
       }
 
+      if (onUpdate) onUpdate();
+    });
+  }
+
+  const invBtn = document.getElementById('btnOpenInventoryFromBoss');
+  if (invBtn) {
+    invBtn.addEventListener('click', () => {
+      playClickSound();
+      triggerHaptic('light');
+      updateState({ activeModal: 'inventory' });
+      if (onUpdate) onUpdate();
+    });
+  }
+
+  const shareBtn = document.getElementById('btnOpenShareCardFromBoss');
+  if (shareBtn) {
+    shareBtn.addEventListener('click', () => {
+      playClickSound();
+      triggerHaptic('light');
+      updateState({ activeModal: 'sharecard' });
       if (onUpdate) onUpdate();
     });
   }

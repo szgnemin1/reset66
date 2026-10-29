@@ -5,10 +5,12 @@
 
 import { getState } from '../services/storage.js';
 import { NEURO_TIPS } from '../data/constants.js';
+import { getClassById } from '../data/classes.js';
 
 export function renderHeader() {
   const state = getState();
   const rank = getRankTitle(state.level);
+  const userClass = getClassById(state.userClass);
   const xpNeeded = state.level * 100;
   const xpPct = Math.min(100, Math.round((state.xp / xpNeeded) * 100));
   const tipIdx = Math.max(0, Math.min(65, state.currentDay - 1));
@@ -34,8 +36,8 @@ export function renderHeader() {
             <h1 class="text-sm font-black tracking-wider uppercase bg-gradient-to-r from-cyan-300 via-white to-purple-300 bg-clip-text text-transparent">
               RESET66 — SOLO HUNTER
             </h1>
-            <span class="text-[10px] font-mono text-cyan-400/80 uppercase tracking-widest block">
-              [ ${rank} ]
+            <span class="text-[10px] font-mono text-cyan-400/80 uppercase tracking-widest block truncate max-w-[210px]">
+              [ ${rank} ] • ${userClass.icon} ${userClass.name}
             </span>
           </div>
         </div>

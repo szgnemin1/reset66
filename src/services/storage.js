@@ -5,6 +5,8 @@
  */
 
 import { BOSS_LORE } from '../data/constants.js';
+import { ARTIFACTS, getArtifactById } from '../data/artifacts.js';
+import { getClassById } from '../data/classes.js';
 
 const STORAGE_KEY = 'RESET66_SOLO_LEVELING_STATE_V2_2';
 
@@ -159,6 +161,21 @@ const INITIAL_STATE = {
   xp: 0,
   streak: 1,
   hearts: 3, // Maks 3 Can
+  shields: 1, // Gölge Kalkanı (Streak Freeze) - 1 ile başlar, maks 2
+  consecutiveSealedDays: 0, // Her 7 aralıksız günde +1 Kalkan kazanılır
+  playerName: 'Gölge Avcısı',
+  playerRank: 'E-Rank',
+  userClass: 'shadow_warrior', // shadow_warrior | sage_monk | iron_titan
+  inventory: ['art_aurelius_seal'], // Başlangıç reliki açık
+  equippedArtifact: 'art_aurelius_seal',
+  coop: {
+    active: false,
+    partnerName: null,
+    partnerClass: null,
+    partnerDamage: 0
+  },
+  coopMyDamage: 0,
+  notificationsEnabled: true,
   hardMode: false,
   soundEnabled: true,
   hapticsEnabled: true,
@@ -226,6 +243,11 @@ export function loadState() {
       currentState = {
         ...INITIAL_STATE,
         ...parsed,
+        shields: parsed.shields !== undefined ? parsed.shields : INITIAL_STATE.shields,
+        userClass: parsed.userClass || INITIAL_STATE.userClass,
+        inventory: parsed.inventory || INITIAL_STATE.inventory,
+        equippedArtifact: parsed.equippedArtifact || INITIAL_STATE.equippedArtifact,
+        coop: { ...INITIAL_STATE.coop, ...(parsed.coop || {}) },
         stats: { ...INITIAL_STATE.stats, ...(parsed.stats || {}) },
         sleepData: { ...INITIAL_STATE.sleepData, ...(parsed.sleepData || {}) },
         workouts: parsed.workouts || getDefaultWorkoutPlan(),
@@ -268,6 +290,12 @@ export function subscribe(listener) {
   return () => listeners.delete(listener);
 }
 
+const RANKS = ['E-Rank', 'D-Rank', 'C-Rank', 'B-Rank', 'A-Rank', 'S-Rank', 'Gölge Hükümdarı'];
+function getRankForLevel(lvl) {
+  const idx = Math.min(RANKS.length - 1, Math.floor(lvl / 2));
+  return RANKS[idx];
+}
+
 export function addXP(amount, pillarCode = null) {
   let xp = currentState.xp + amount;
   let level = currentState.level;
@@ -288,32 +316,102 @@ export function addXP(amount, pillarCode = null) {
     Object.keys(stats).forEach(k => { stats[k] += 1; });
   }
 
-  updateState({ xp, level, stats });
-  return { leveledUp, newLevel: level, gainedXP: amount };
+  const playerRank = getRankForLevel(level);
+  updateState({ xp, level, stats, playerRank });
+  return { leveledUp, newLevel: level, gainedXP: amount, playerRank };
 }
 
 /**
  * Inflicts damage directly on the active Boss.
+ * Applies passives from Hunter Class and equipped Artifact.
  */
-export function damageBoss(dmgAmount) {
+export function damageBoss(baseDmg, source = null) {
+  const userClass = getClassById(currentState.userClass);
+  const equipped = getArtifactById(currentState.equippedArtifact);
+
+  let finalDmg = baseDmg;
+
+  // Class multiplier
+  if (source === 'workout' && userClass.multiplier?.workoutDmg) {
+    finalDmg = Math.round(finalDmg * userClass.multiplier.workoutDmg);
+  } else if (source === 'reading' && userClass.multiplier?.readingDmg) {
+    finalDmg = Math.round(finalDmg * userClass.multiplier.readingDmg);
+  } else if (source === 'run' && userClass.multiplier?.runDmg) {
+    finalDmg = Math.round(finalDmg * userClass.multiplier.runDmg);
+  }
+
+  // Artifact bonus
+  if (equipped) {
+    if (source === 'workout' && equipped.bonusBossDmgWorkout) finalDmg += equipped.bonusBossDmgWorkout;
+    if (source === 'reading' && equipped.bonusBossDmgReading) finalDmg += equipped.bonusBossDmgReading;
+    if (source === 'run' && equipped.bonusBossDmgRun) finalDmg += equipped.bonusBossDmgRun;
+    if (source === 'meditation' && equipped.bonusBossDmgMeditation) finalDmg += equipped.bonusBossDmgMeditation;
+    if (source === 'cold' && equipped.bonusBossDmgCold) finalDmg += equipped.bonusBossDmgCold;
+    if (source === 'water' && equipped.bonusBossDmgWater) finalDmg += equipped.bonusBossDmgWater;
+  }
+
   const currentHp = currentState.bossHp;
-  const newHp = Math.max(0, currentHp - dmgAmount);
-  updateState({ bossHp: newHp });
-  return { newHp, damageDealt: dmgAmount, isDefeated: newHp === 0 };
+  const newHp = Math.max(0, currentHp - finalDmg);
+  const isDefeated = newHp === 0 && currentHp > 0;
+
+  let droppedArtifact = null;
+  let newInventory = [...(currentState.inventory || [])];
+
+  if (isDefeated) {
+    // Drop an unowned artifact!
+    const unowned = ARTIFACTS.filter(a => !newInventory.includes(a.id));
+    if (unowned.length > 0) {
+      droppedArtifact = unowned[Math.floor(Math.random() * unowned.length)];
+      newInventory.push(droppedArtifact.id);
+    }
+  }
+
+  updateState({
+    bossHp: newHp,
+    inventory: newInventory,
+    coopMyDamage: (currentState.coopMyDamage || 0) + finalDmg
+  });
+
+  return { newHp, damageDealt: finalDmg, isDefeated, droppedArtifact };
 }
 
 /**
  * Triggers Missed Day Penalty:
- * Boss gains x2 HP/Power (Berserk Mode), Player loses 1 Heart, Streak takes hit.
+ * If user has a Shadow Shield (Gölge Kalkanı), it absorbs the hit and protects streak & hearts!
+ * Otherwise: Boss gains x2 HP/Power (Berserk Mode), Player loses 1 Heart, Streak takes hit.
  */
 export function triggerMissedDayPenalty() {
+  const chain = { ...currentState.chainDays };
+  const currentDay = currentState.currentDay;
+  const nextDay = Math.min(66, currentDay + 1);
+
+  // Check if Shield absorbs the hit!
+  if (currentState.shields > 0) {
+    const remainingShields = currentState.shields - 1;
+    chain[currentDay] = 'shielded'; // Golden shielded link
+    if (nextDay <= 66) chain[nextDay] = 'current';
+
+    const resetHabits = CORE_DAILY_QUESTS.map(q => ({ ...q }));
+
+    updateState({
+      shields: remainingShields,
+      currentDay: nextDay,
+      chainDays: chain,
+      todayHabits: resetHabits
+    });
+
+    return {
+      shielded: true,
+      remainingShields,
+      message: '🛡️ GÖLGE KALKANI DEVREYE GİRDİ! Zincirinin kırılması ve can kaybı engellendi.'
+    };
+  }
+
+  // Normal Penalty (No shield)
   const newHearts = Math.max(0, currentState.hearts - 1);
   const enragedHp = currentState.bossMaxHp * 2;
-  const chain = { ...currentState.chainDays };
-  chain[currentState.currentDay] = 'missed';
-
-  const nextDay = Math.min(66, currentState.currentDay + 1);
-  chain[nextDay] = 'current';
+  chain[currentDay] = 'missed';
+  if (nextDay <= 66) chain[nextDay] = 'current';
 
   const resetHabits = CORE_DAILY_QUESTS.map(q => ({ ...q }));
 
@@ -329,12 +427,12 @@ export function triggerMissedDayPenalty() {
     todayHabits: resetHabits
   });
 
-  return { newHearts, enragedHp };
+  return { shielded: false, newHearts, enragedHp };
 }
 
 /**
  * Seals the day successfully:
- * Marks chain node as 'done', advances day, resets daily habit checklist.
+ * Marks chain node as 'done', advances day, tracks consecutive days for Shield rewards.
  */
 export function completeDaySuccessfully() {
   const chain = { ...currentState.chainDays };
@@ -348,6 +446,18 @@ export function completeDaySuccessfully() {
   const nextStreak = currentState.streak + 1;
   const resetHabits = CORE_DAILY_QUESTS.map(q => ({ ...q }));
 
+  // 7-day shield award logic
+  const consecutive = (currentState.consecutiveSealedDays || 0) + 1;
+  let shields = currentState.shields || 0;
+  let earnedShield = false;
+
+  if (consecutive >= 7) {
+    if (shields < 2) {
+      shields += 1;
+      earnedShield = true;
+    }
+  }
+
   // Check if current boss was killed or need to progress boss week
   const nextWeek = Math.min(10, Math.ceil(nextDay / 7));
   const nextBoss = BOSS_LORE[nextWeek - 1] || BOSS_LORE[0];
@@ -355,6 +465,8 @@ export function completeDaySuccessfully() {
   updateState({
     currentDay: nextDay,
     streak: nextStreak,
+    consecutiveSealedDays: consecutive >= 7 ? 0 : consecutive,
+    shields,
     bossIsEnraged: false,
     bossMultiplier: 1,
     bossHp: nextBoss.hp,
@@ -362,6 +474,8 @@ export function completeDaySuccessfully() {
     chainDays: chain,
     todayHabits: resetHabits
   });
+
+  return { earnedShield, nextDay, nextStreak };
 }
 
 export function resetState() {

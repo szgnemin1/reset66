@@ -54,10 +54,34 @@ export function renderQuestsTab() {
               <span class="text-[10px] font-mono uppercase text-rose-400 font-bold">HEDEF BOSS:</span>
               <span class="text-xs font-bold text-white">${state.bossIsEnraged ? '🔥 [ÖFKELİ X2] ' : ''}Gölge Patron</span>
             </div>
-            <span class="text-[10px] text-slate-400">Her tamamlanan görev bosstan anlık can götürür!</span>
+            <div class="flex items-center gap-2 mt-0.5">
+              <span class="text-[10px] text-slate-400">Her görev anlık can götürür</span>
+              <span class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                🛡️ ${state.shields || 0}/2 Kalkan
+              </span>
+            </div>
           </div>
         </div>
         <div class="text-right">
+          <span class="text-xs font-mono font-bold text-rose-400 block">${state.bossHp} / ${state.bossMaxHp} HP</span>
+          <button type="button" class="btn-open-modal-trigger text-[10px] text-cyan-400 font-mono underline hover:text-cyan-300" data-modal="sharecard">
+            📸 Hikaye Kartı
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick RPG Action Pills -->
+      <div class="grid grid-cols-2 gap-2">
+        <button type="button" class="btn-open-modal-trigger py-2 px-3 rounded-xl bg-slate-900 border border-purple-500/30 hover:border-purple-500/60 text-purple-300 text-xs font-mono font-bold flex items-center justify-center gap-1.5 transition" data-modal="inventory">
+          <span>🎒</span>
+          <span>Avcı Envanteri & Eserler</span>
+        </button>
+        
+        <button type="button" class="btn-open-modal-trigger py-2 px-3 rounded-xl bg-slate-900 border border-cyan-500/30 hover:border-cyan-500/60 text-cyan-300 text-xs font-mono font-bold flex items-center justify-center gap-1.5 transition" data-modal="sharecard">
+          <span>📸</span>
+          <span>Paylaşım Kartı Oluştur</span>
+        </button>
+      </div>
           <span class="text-xs font-mono font-bold text-rose-400">${state.bossHp} / ${state.bossMaxHp} HP</span>
           <div class="w-24 h-1.5 rounded-full bg-slate-900 border border-slate-800 overflow-hidden mt-1">
             <div class="h-full bg-rose-500 transition-all duration-300" style="width: ${Math.round((state.bossHp / state.bossMaxHp) * 100)}%"></div>
@@ -249,9 +273,17 @@ export function attachQuestsListeners(onUpdate) {
       if (newDone) {
         playBossHitSound();
         triggerHaptic('heavy');
-        damageBoss(habit.bossDmg);
+        const sourceMap = {
+          q_run: 'run',
+          q_workout: 'workout',
+          q_reading: 'reading',
+          q_meditation: 'meditation',
+          q_water: 'water',
+          q_cold_shower: 'cold'
+        };
+        const res = damageBoss(habit.bossDmg, sourceMap[habit.id]);
         addXP(habit.xp, habit.pillar);
-        alert(`💥 KRİTİK HASAR! ${habit.title} tamamlandı. Boss'a ${habit.bossDmg} Hasar vuruldu, +${habit.xp} XP kazanıldı!`);
+        alert(`💥 KRİTİK HASAR! ${habit.title} tamamlandı. Boss'a ${res.damageDealt} Hasar vuruldu, +${habit.xp} XP kazanıldı!`);
       } else {
         playClickSound();
         triggerHaptic('light');
@@ -275,8 +307,14 @@ export function attachQuestsListeners(onUpdate) {
 
       playLevelUpSound();
       triggerHaptic('success');
-      alert(`🎉 TEBRİKLER! Gün ${state.currentDay} başarıyla mühürlendi. Zinciri kırmadın, yarınki zindana ilerleniyor!`);
-      completeDaySuccessfully();
+      const res = completeDaySuccessfully();
+
+      if (res?.earnedShield) {
+        alert(`🎉 TEBRİKLER! Gün ${state.currentDay} başarıyla mühürlendi!\n\n🛡️ 7 GÜNLÜK DİSİPLİN MÜKÂFATI: +1 GÖLGE KALKANI KAZANILDI!`);
+      } else {
+        alert(`🎉 TEBRİKLER! Gün ${state.currentDay} başarıyla mühürlendi. Zinciri kırmadın, yarınki zindana ilerleniyor!`);
+      }
+
       updateState({ activeTab: 'boss' });
       if (onUpdate) onUpdate();
     });
@@ -286,11 +324,17 @@ export function attachQuestsListeners(onUpdate) {
   const skipBtn = document.getElementById('btnSkipDayPenalty');
   if (skipBtn) {
     skipBtn.addEventListener('click', () => {
-      if (confirm('⚠️ UYARI: Bir gün atlandığında Boss X2 Güçlenecek (Berserk Modu) ve 1 Canınız (-1 ❤️) azalacak. Onaylıyor musunuz?')) {
-        playBossHitSound();
-        triggerHaptic('error');
+      if (confirm('⚠️ UYARI: Bir gün atlandığında Boss X2 Güçlenecek veya Gölge Kalkanınız harcanacak. Onaylıyor musunuz?')) {
         const res = triggerMissedDayPenalty();
-        alert(`☠️ GÜN ATLANDI! Boss x2 Güçlendi (${res.enragedHp} HP) ve Canınız Azaldı (Kalan: ${res.newHearts} ❤️)! Zincir haritasında kırmızı mühür vuruldu.`);
+        if (res.shielded) {
+          playLevelUpSound();
+          triggerHaptic('success');
+          alert(`🛡️ GÖLGE KALKANI DEVREYE GİRDİ!\n\nKalan Kalkan: ${res.remainingShields}/2\nZincir haritan kırmızıya dönmedi ve canın korundu!`);
+        } else {
+          playBossHitSound();
+          triggerHaptic('error');
+          alert(`☠️ GÜN ATLANDI! Boss x2 Güçlendi (${res.enragedHp} HP) ve Canınız Azaldı (Kalan: ${res.newHearts} ❤️)! Zincir haritasında kırmızı mühür vuruldu.`);
+        }
         updateState({ activeTab: 'boss' });
         if (onUpdate) onUpdate();
       }

@@ -1,7 +1,8 @@
 /**
  * Reset66 (Life Reset: 66 Day Habit RPG)
  * Main Application Orchestrator & Component Renderer
- * Integrates 5 Core Tabs: Bugün, Boss & Harita, Spor Programı, Kitaplık, Ayarlar
+ * Integrates 5 Core Tabs, Hunter Classes, Artifact Inventory,
+ * 40Hz / Brown Noise Soundscapes, Story Card Generator, and Local Notifications.
  */
 
 import './styles/main.css';
@@ -17,13 +18,20 @@ import { renderWorkoutTab, attachWorkoutListeners } from './components/workout.j
 import { renderCardsTab, renderBooksModal, attachCardsListeners } from './components/cards.js';
 import { renderSettingsTab, attachSettingsListeners } from './components/settings.js';
 
-// Interactive Modals
+// Interactive Modals & Overlays
 import { renderReaderModal, attachReaderListeners } from './components/reader.js';
 import { renderOnboardingModal, attachOnboardingListeners } from './components/onboarding.js';
 import { renderMeditationModal, attachMeditationListeners } from './components/meditation.js';
 import { renderFocusModal, attachFocusListeners } from './components/focus.js';
 import { renderSleepModal, attachSleepListeners } from './components/sleep.js';
+import { renderInventoryModal, attachInventoryListeners } from './components/inventory.js';
+import { renderShareCardModal, attachShareCardListeners } from './components/sharecard.js';
+import { renderSoundscapeBar, attachSoundscapeBarListeners } from './components/soundscape_bar.js';
+
+// Services
 import { checkAndPromptUpdate } from './services/updater.js';
+import { scheduleDailyRoutineNotifications } from './services/notifications.js';
+import { subscribeSoundscape } from './services/soundscape.js';
 
 function renderApp() {
   const state = getState();
@@ -50,6 +58,10 @@ function renderApp() {
   let modalHtml = '';
   if (!state.onboardingDone || state.activeModal === 'assessment') {
     modalHtml = renderOnboardingModal();
+  } else if (state.activeModal === 'inventory') {
+    modalHtml = renderInventoryModal();
+  } else if (state.activeModal === 'sharecard') {
+    modalHtml = renderShareCardModal();
   } else if (state.activeModal === 'reader') {
     modalHtml = renderReaderModal();
   } else if (state.activeModal === 'meditation') {
@@ -68,6 +80,9 @@ function renderApp() {
       
       <!-- Top Glow Aura -->
       <div class="fixed top-0 left-1/2 -translate-x-1/2 w-96 h-36 bg-cyan-500/10 blur-[90px] pointer-events-none"></div>
+
+      <!-- Floating Ambient Soundscape Controller Bar -->
+      ${renderSoundscapeBar()}
 
       <!-- Main Shell Container -->
       <main class="max-w-xl mx-auto px-3.5 pt-3.5 space-y-4">
@@ -91,6 +106,9 @@ function renderApp() {
   // Attach navigation listeners
   attachNavListeners(renderApp);
 
+  // Attach floating soundscape bar listeners
+  attachSoundscapeBarListeners(renderApp);
+
   // Attach active tab listeners
   if (state.activeTab === 'quests') {
     attachQuestsListeners(renderApp);
@@ -107,6 +125,10 @@ function renderApp() {
   // Attach modal listeners if any modal is active
   if (!state.onboardingDone || state.activeModal === 'assessment') {
     attachOnboardingListeners(renderApp);
+  } else if (state.activeModal === 'inventory') {
+    attachInventoryListeners(renderApp);
+  } else if (state.activeModal === 'sharecard') {
+    attachShareCardListeners(renderApp);
   } else if (state.activeModal === 'reader') {
     attachReaderListeners(renderApp);
   } else if (state.activeModal === 'meditation') {
@@ -124,9 +146,18 @@ function renderApp() {
 document.addEventListener('DOMContentLoaded', () => {
   loadState();
   renderApp();
+
   subscribe(() => {
     // Re-render on background state changes if necessary
   });
+
+  // Soundscape reactive listener
+  subscribeSoundscape(() => {
+    renderApp();
+  });
+
+  // Schedule daily routine local notifications
+  scheduleDailyRoutineNotifications();
 
   // Real-Time GitHub In-App Auto-Update Check on Startup
   setTimeout(() => {

@@ -5,9 +5,10 @@
  */
 
 import { getState, updateState, resetState, exportStateJSON, importStateJSON } from '../services/storage.js';
-import { playClickSound } from '../services/audio.js';
+import { playClickSound, playLevelUpSound } from '../services/audio.js';
 import { triggerHaptic } from '../services/haptics.js';
 import { CURRENT_VERSION, checkAndPromptUpdate } from '../services/updater.js';
+import { scheduleDailyRoutineNotifications, sendInstantTestNotification, requestNotificationPermissions } from '../services/notifications.js';
 
 export function renderSettingsTab() {
   const state = getState();
@@ -53,6 +54,22 @@ export function renderSettingsTab() {
           <button type="button" id="btnSettingToggleHaptics" class="px-4 py-1.5 rounded-xl text-xs font-mono font-bold transition ${state.hapticsEnabled ? 'bg-purple-500 text-black shadow-sm' : 'bg-slate-800 text-slate-500'}">
             ${state.hapticsEnabled ? 'AÇIK' : 'KAPALI'}
           </button>
+        </div>
+
+        <!-- Local Notifications Toggle -->
+        <div class="flex items-center justify-between p-3 rounded-2xl bg-slate-950 border border-slate-800">
+          <div>
+            <span class="text-xs font-bold text-white block">🔔 Çevrimdışı Akıllı Bildirimler</span>
+            <span class="text-[10px] text-slate-400">07:30 Sabah, 14:00 Senkron, 21:30 Berserk Uyarısı</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <button type="button" id="btnTestNotification" class="px-2 py-1 rounded-lg text-[10px] font-mono text-cyan-400 border border-cyan-500/30 hover:bg-cyan-500/10">
+              Test Et
+            </button>
+            <button type="button" id="btnSettingToggleNotifications" class="px-4 py-1.5 rounded-xl text-xs font-mono font-bold transition ${state.notificationsEnabled ? 'bg-emerald-500 text-black shadow-sm' : 'bg-slate-800 text-slate-500'}">
+              ${state.notificationsEnabled ? 'AÇIK' : 'KAPALI'}
+            </button>
+          </div>
         </div>
 
         <!-- In-App Auto-Update Checker Row -->
@@ -117,7 +134,34 @@ export function attachSettingsListeners(onUpdate) {
     });
   }
 
-  // Toggle haptics
+  // Toggle notifications
+  const notifBtn = document.getElementById('btnSettingToggleNotifications');
+  if (notifBtn) {
+    notifBtn.addEventListener('click', async () => {
+      const state = getState();
+      playClickSound();
+      triggerHaptic('light');
+      const newEnabled = !state.notificationsEnabled;
+      if (newEnabled) {
+        await requestNotificationPermissions();
+      }
+      updateState({ notificationsEnabled: newEnabled });
+      await scheduleDailyRoutineNotifications();
+      if (onUpdate) onUpdate();
+    });
+  }
+
+  // Send Test Notification
+  const testNotifBtn = document.getElementById('btnTestNotification');
+  if (testNotifBtn) {
+    testNotifBtn.addEventListener('click', async () => {
+      playClickSound();
+      triggerHaptic('success');
+      await requestNotificationPermissions();
+      await sendInstantTestNotification();
+      alert('🔔 Test bildirimi tetiklendi! Bildirim panelinizi kontrol edin.');
+    });
+  }
   const hapticsBtn = document.getElementById('btnSettingToggleHaptics');
   if (hapticsBtn) {
     hapticsBtn.addEventListener('click', () => {

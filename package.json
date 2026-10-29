@@ -1,6 +1,6 @@
 {
   "name": "reset66-lifereset-android",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "type": "module",
   "description": "Reset66 — 66-Day Habit Formation RPG (Open Source Android Life Reset Clone)",
   "main": "www/index.html",
@@ -30,6 +30,7 @@
     "@capacitor/app": "^6.0.2",
     "@capacitor/core": "^6.2.0",
     "@capacitor/haptics": "^6.0.2",
+    "@capacitor/local-notifications": "^6.1.3",
     "@capacitor/status-bar": "^6.0.2"
   },
   "devDependencies": {
