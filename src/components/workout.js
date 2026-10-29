@@ -1,15 +1,20 @@
 /**
- * Workout Builder & Active Training Set Tracker
- * Schoenfeld hypertrophy volume landmarks, rest countdown timer, boss critical hit.
+ * Advanced Workout Builder & Filterable Exercise Database
+ * Features: Equipment filtering (Bodyweight, Dumbbell, Barbell, Band, Machine),
+ * muscle filters, animated GIF/image demos from yuhonas/free-exercise-db,
+ * rest countdown timer, and 1-tap addition to personal routine.
  */
 
-import { getState, updateState, addXP } from '../services/storage.js';
+import { EQUIPMENT_TYPES, MUSCLE_GROUPS, EXERCISE_DATABASE } from '../data/exercises.js';
+import { getState, updateState, addXP, damageBoss } from '../services/storage.js';
 import { playWhistleSound, playBossHitSound, playLevelUpSound, playClickSound } from '../services/audio.js';
 import { triggerHaptic } from '../services/haptics.js';
 import { keepScreenAwake } from '../services/keepawake.js';
 
+let selectedEquipment = 'all';
+let selectedMuscle = 'all';
+let searchQuery = '';
 let selectedDayKey = 'monday';
-let activeWorkoutMode = false;
 let completedSetsMap = {}; // exId -> count
 let restTimerSeconds = 0;
 let restTimerInterval = null;
@@ -25,88 +30,96 @@ const DAYS = [
   { key: 'sunday', label: 'Paz' }
 ];
 
-export function renderWorkoutModal() {
+export function renderWorkoutTab() {
   const state = getState();
   const dayPlan = state.workouts[selectedDayKey] || { name: 'Özel Antrenman', exercises: [] };
 
+  // Filter exercises
+  const filteredExercises = EXERCISE_DATABASE.filter(ex => {
+    const matchEquip = selectedEquipment === 'all' || ex.equipment === selectedEquipment;
+    const matchMuscle = selectedMuscle === 'all' || ex.muscle === selectedMuscle;
+    const matchSearch = !searchQuery || ex.name.toLowerCase().includes(searchQuery.toLowerCase()) || ex.targetMuscles.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchEquip && matchMuscle && matchSearch;
+  });
+
   return `
-    <div id="workoutModalBackdrop" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md animate-fadeIn">
-      <div class="w-full max-w-lg max-h-[92vh] overflow-y-auto rounded-3xl bg-slate-900 border border-amber-500/40 p-5 shadow-[0_0_40px_rgba(245,158,11,0.25)] space-y-4 text-white">
+    <div class="space-y-5 animate-fadeIn">
+      
+      <!-- Top Title & Subtitle -->
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-xs font-mono font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+            <span>🏋️ SPOR PROGRAMI & EGZERSİZ VERİTABANI</span>
+          </h2>
+          <span class="text-[11px] text-slate-400">Ekipmanlı / Ekipmansız filtreleme, hareket rehberi & dinlenme sayacı.</span>
+        </div>
+      </div>
+
+      <!-- Active Day Workout Tracker Box -->
+      <div class="rounded-3xl bg-slate-900/90 border border-amber-500/40 p-4 sm:p-5 space-y-4 shadow-sm">
         
-        <!-- Header -->
-        <div class="flex items-center justify-between pb-3 border-b border-slate-800">
-          <div class="flex items-center gap-2">
-            <span class="text-2xl">🏋️</span>
-            <div>
-              <h2 class="text-xs font-mono font-bold uppercase tracking-wider text-amber-400">ANTRENMAN & GELİŞİM STÜDYOSU</h2>
-              <span class="text-[10px] text-slate-400">Progresif Yükleme (Schoenfeld) & Set Takibi</span>
-            </div>
+        <!-- Day Selector Pills -->
+        <div class="flex items-center justify-between gap-1 pb-3 border-b border-slate-800">
+          <div class="grid grid-cols-7 gap-1 flex-1">
+            ${DAYS.map(d => {
+              const isSel = d.key === selectedDayKey;
+              return `
+                <button type="button" class="btn-workout-day py-1.5 rounded-xl border text-center transition ${isSel ? 'bg-amber-500 text-black border-amber-400 font-bold shadow-md' : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white'}" data-day="${d.key}">
+                  <span class="block text-xs font-mono">${d.label}</span>
+                </button>
+              `;
+            }).join('')}
           </div>
-          <button type="button" id="btnCloseWorkoutModal" class="p-1.5 rounded-lg bg-slate-800 text-slate-400 hover:text-white transition">
-            ✕
-          </button>
         </div>
 
-        <!-- 7-Day Day Selector Bar -->
-        <div class="grid grid-cols-7 gap-1.5">
-          ${DAYS.map(d => {
-            const isSel = d.key === selectedDayKey;
-            return `
-              <button type="button" class="btn-workout-day py-2 rounded-xl border text-center transition ${isSel ? 'bg-amber-500 text-black border-amber-400 font-bold shadow-md' : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white'}" data-day="${d.key}">
-                <span class="block text-xs">${d.label}</span>
-              </button>
-            `;
-          }).join('')}
-        </div>
-
-        <!-- Day Program Title & Add Exercise Button -->
-        <div class="flex items-center justify-between p-3 rounded-2xl bg-slate-950 border border-slate-800">
+        <!-- Selected Day Plan Info & Rest Timer -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-2xl bg-slate-950 border border-slate-800">
           <div>
-            <span class="text-[10px] font-mono text-amber-400 uppercase font-bold tracking-wider">PROGRAM PLANI:</span>
+            <span class="text-[10px] font-mono text-amber-400 uppercase font-bold tracking-wider">GÜNÜN PROGRAMI:</span>
             <h3 class="text-sm font-bold text-white">${dayPlan.name}</h3>
           </div>
-          <button type="button" id="btnAddExerciseBtn" class="px-3 py-1.5 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-mono font-bold hover:bg-amber-500/30 transition">
-            + Hareket Ekle
-          </button>
-        </div>
 
-        <!-- Rest Countdown Timer Box (If Active) -->
-        <div class="p-3.5 rounded-2xl bg-amber-950/20 border border-amber-500/30 space-y-2">
-          <div class="flex items-center justify-between text-xs font-mono">
-            <span class="text-slate-300 font-bold">⏱️ Set Arası Dinlenme Sayacı:</span>
-            <span id="workoutRestTimerDisplay" class="text-lg font-bold text-amber-400 font-mono">
-              ${restTimerSeconds > 0 ? `${restTimerSeconds}s` : 'Hazır'}
-            </span>
-          </div>
-
-          <!-- Rest presets -->
-          <div class="grid grid-cols-4 gap-1.5 text-xs font-mono">
-            ${[30, 60, 90, 120].map(s => `
-              <button type="button" class="btn-rest-preset py-1.5 rounded-lg border text-center transition ${s === selectedRestDuration ? 'bg-amber-500/30 text-amber-200 border-amber-500/60 font-bold' : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white'}" data-sec="${s}">
-                ${s}s
-              </button>
-            `).join('')}
+          <!-- Rest Timer Box -->
+          <div class="flex items-center gap-2.5">
+            <div class="text-right">
+              <span class="text-[9px] font-mono text-slate-400 block uppercase">DİNLENME SAYACI</span>
+              <span id="workoutRestTimerDisplay" class="text-base font-mono font-bold text-amber-400">
+                ${restTimerSeconds > 0 ? `${restTimerSeconds}s` : 'Hazır'}
+              </span>
+            </div>
+            <div class="flex items-center gap-1 text-[10px] font-mono">
+              ${[30, 60, 90].map(s => `
+                <button type="button" class="btn-rest-preset px-2 py-1 rounded-lg border transition ${s === selectedRestDuration ? 'bg-amber-500/30 text-amber-200 border-amber-500/60 font-bold' : 'bg-slate-900 border-slate-800 text-slate-400'}" data-sec="${s}">
+                  ${s}s
+                </button>
+              `).join('')}
+            </div>
           </div>
         </div>
 
-        <!-- Exercise List -->
+        <!-- Current Day Exercises Sets Tracker -->
         <div class="space-y-2.5">
-          ${dayPlan.exercises.map((ex, idx) => {
+          ${dayPlan.exercises.map((ex) => {
             const doneSets = completedSetsMap[ex.id] || 0;
             return `
-              <div class="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-2.5">
-                <div class="flex items-center justify-between">
-                  <span class="text-xs font-bold text-white">${ex.name}</span>
-                  <span class="text-[11px] font-mono text-amber-400 font-semibold">${ex.weight}</span>
+              <div class="p-3 rounded-2xl bg-slate-950/70 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs font-bold text-white">${ex.name}</span>
+                    <span class="text-[9px] font-mono px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 font-bold">
+                      ${ex.equipment === 'bodyweight' ? 'Vücut Ağ.' : ex.weight}
+                    </span>
+                  </div>
+                  <span class="text-[10px] text-slate-400">${ex.sets} Set × ${ex.reps} Tekrar</span>
                 </div>
 
-                <!-- Sets Checklist -->
-                <div class="flex items-center gap-2">
+                <!-- Sets Row -->
+                <div class="flex items-center gap-1.5">
                   ${Array(ex.sets).fill(0).map((_, setIdx) => {
                     const isDone = setIdx < doneSets;
                     return `
-                      <button type="button" class="btn-toggle-set flex-1 py-1.5 rounded-lg border text-xs font-mono font-bold transition ${isDone ? 'bg-amber-500 text-black border-amber-400 shadow-sm' : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'}" data-ex="${ex.id}" data-set="${setIdx}">
-                        ${isDone ? '✓' : `Set ${setIdx + 1}`}
+                      <button type="button" class="btn-toggle-set px-3 py-1 rounded-lg border text-xs font-mono font-bold transition ${isDone ? 'bg-amber-500 text-black border-amber-400' : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'}" data-ex="${ex.id}" data-set="${setIdx}">
+                        ${isDone ? '✓' : `S${setIdx + 1}`}
                       </button>
                     `;
                   }).join('')}
@@ -117,28 +130,94 @@ export function renderWorkoutModal() {
         </div>
 
         <!-- Finish Workout & Deal Boss Damage Button -->
-        <button type="button" id="btnFinishWorkout" class="w-full py-3 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 hover:brightness-110 active:scale-95 text-black font-black text-xs font-mono tracking-widest uppercase transition shadow-[0_0_20px_rgba(245,158,11,0.4)]">
-          💥 ANTRENMANI BİTİR & BOSS'A KRİTİK VUR (-80 HP)
+        <button type="button" id="btnFinishDayWorkout" class="w-full py-3 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 hover:brightness-110 active:scale-95 text-black font-black text-xs font-mono tracking-widest uppercase transition shadow-[0_0_20px_rgba(245,158,11,0.4)]">
+          💥 GÜNÜN ANTRENMANINI BİTİR & BOSS'A VUR (-50 HP)
         </button>
 
       </div>
+
+      <!-- Filterable Exercise Library (GitHub Free-Exercise-DB Repo) -->
+      <div class="rounded-3xl bg-slate-900/80 border border-slate-800 p-4 sm:p-5 space-y-4">
+        
+        <div>
+          <h3 class="text-xs font-mono font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-2">
+            <span>📚 TÜM EGZERSİZLER & HAREKET REHBERİ (GİTHUB FREE-EXERCİSE-DB)</span>
+          </h3>
+          <p class="text-[11px] text-slate-400">Ekipmanına ve hedefine göre hareket ara, GIF rehberini incele ve programına ekle.</p>
+        </div>
+
+        <!-- Equipment Filter Row -->
+        <div class="space-y-1.5">
+          <span class="text-[10px] font-mono text-slate-400 uppercase font-bold">EKİPMAN SEÇİMİ:</span>
+          <div class="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+            ${EQUIPMENT_TYPES.map(eq => `
+              <button type="button" class="btn-filter-equip px-3 py-1 rounded-xl text-xs font-mono font-bold whitespace-nowrap transition ${eq.id === selectedEquipment ? 'bg-amber-500 text-black shadow-md shadow-amber-500/20' : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'}" data-equip="${eq.id}">
+                ${eq.label}
+              </button>
+            `).join('')}
+          </div>
+        </div>
+
+        <!-- Muscle Group Filter Row -->
+        <div class="space-y-1.5">
+          <span class="text-[10px] font-mono text-slate-400 uppercase font-bold">HEDEF KAS GRUBU:</span>
+          <div class="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+            ${MUSCLE_GROUPS.map(m => `
+              <button type="button" class="btn-filter-muscle px-3 py-1 rounded-xl text-xs font-mono font-bold whitespace-nowrap transition ${m.id === selectedMuscle ? 'bg-cyan-500 text-black shadow-md shadow-cyan-500/20' : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'}" data-muscle="${m.id}">
+                ${m.label}
+              </button>
+            `).join('')}
+          </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="relative">
+          <input type="text" id="exerciseSearchInput" placeholder="Hareket veya kas adı ara (Örn: Şınav, Göğüs, Squat)..." value="${searchQuery}" class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500/60 font-sans" />
+        </div>
+
+        <!-- Filtered Exercise Cards Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-2">
+          ${filteredExercises.map(ex => `
+            <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 hover:border-amber-500/40 transition space-y-3 flex flex-col justify-between">
+              
+              <div class="space-y-2">
+                <!-- Image Demo -->
+                <div class="w-full h-36 rounded-xl overflow-hidden bg-slate-900 border border-slate-800 relative group flex items-center justify-center">
+                  <img src="${ex.gif}" alt="${ex.name}" class="w-full h-full object-cover transition duration-300 group-hover:scale-105" onerror="this.src='./assets/hero.jpg'" loading="lazy" />
+                  <div class="absolute bottom-2 left-2 right-2 flex items-center justify-between">
+                    <span class="text-[9px] font-mono px-2 py-0.5 rounded-md bg-black/80 text-amber-300 font-bold uppercase backdrop-blur-sm">
+                      ${ex.equipment}
+                    </span>
+                    <span class="text-[9px] font-mono px-2 py-0.5 rounded-md bg-black/80 text-cyan-300 font-bold backdrop-blur-sm">
+                      ${ex.muscle}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Info -->
+                <div>
+                  <h4 class="text-xs font-bold text-white">${ex.name}</h4>
+                  <p class="text-[10px] text-slate-400 line-clamp-2 mt-0.5 leading-snug">${ex.instructions}</p>
+                </div>
+              </div>
+
+              <!-- Add to Plan Button -->
+              <button type="button" class="btn-add-exercise-to-plan w-full py-2 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/30 hover:bg-amber-500/30 text-xs font-mono font-bold transition flex items-center justify-center gap-1.5" data-id="${ex.id}" data-name="${ex.name}" data-equip="${ex.equipment}">
+                <span>+ Bu Güne Ekle (${DAYS.find(d => d.key === selectedDayKey)?.label})</span>
+              </button>
+
+            </div>
+          `).join('')}
+        </div>
+
+      </div>
+
     </div>
   `;
 }
 
 export function attachWorkoutListeners(onUpdate) {
-  // Close Modal
-  const closeBtn = document.getElementById('btnCloseWorkoutModal');
-  if (closeBtn) {
-    closeBtn.addEventListener('click', () => {
-      stopRestTimer();
-      keepScreenAwake(false);
-      updateState({ activeModal: null });
-      if (onUpdate) onUpdate();
-    });
-  }
-
-  // Day tab switch
+  // Day switch
   document.querySelectorAll('.btn-workout-day').forEach(btn => {
     btn.addEventListener('click', () => {
       selectedDayKey = btn.getAttribute('data-day');
@@ -148,7 +227,7 @@ export function attachWorkoutListeners(onUpdate) {
     });
   });
 
-  // Rest duration preset
+  // Rest preset
   document.querySelectorAll('.btn-rest-preset').forEach(btn => {
     btn.addEventListener('click', () => {
       selectedRestDuration = Number(btn.getAttribute('data-sec'));
@@ -158,7 +237,7 @@ export function attachWorkoutListeners(onUpdate) {
     });
   });
 
-  // Set toggle & auto rest trigger
+  // Set toggle & auto rest
   document.querySelectorAll('.btn-toggle-set').forEach(btn => {
     btn.addEventListener('click', () => {
       const exId = btn.getAttribute('data-ex');
@@ -179,30 +258,68 @@ export function attachWorkoutListeners(onUpdate) {
     });
   });
 
-  // Add Exercise Prompt
-  const addBtn = document.getElementById('btnAddExerciseBtn');
-  if (addBtn) {
-    addBtn.addEventListener('click', () => {
-      const name = prompt('Hareket adı (Örn: Barbell Bench Press):');
-      if (!name) return;
-      const sets = Number(prompt('Set sayısı:', '4')) || 3;
-      const reps = prompt('Tekrar sayısı (Örn: 10):', '10') || '10';
-      const weight = prompt('Hedef ağırlık (Örn: 25 kg):', '20 kg') || 'Kişisel';
+  // Equipment Filter
+  document.querySelectorAll('.btn-filter-equip').forEach(btn => {
+    btn.addEventListener('click', () => {
+      selectedEquipment = btn.getAttribute('data-equip');
+      playClickSound();
+      triggerHaptic('light');
+      if (onUpdate) onUpdate();
+    });
+  });
 
-      const state = getState();
-      const plan = state.workouts[selectedDayKey];
-      const newEx = { id: 'ex_' + Date.now(), name, sets, reps, weight };
-      const updatedPlan = { ...plan, exercises: [...plan.exercises, newEx] };
+  // Muscle Filter
+  document.querySelectorAll('.btn-filter-muscle').forEach(btn => {
+    btn.addEventListener('click', () => {
+      selectedMuscle = btn.getAttribute('data-muscle');
+      playClickSound();
+      triggerHaptic('light');
+      if (onUpdate) onUpdate();
+    });
+  });
 
-      updateState({
-        workouts: { ...state.workouts, [selectedDayKey]: updatedPlan }
-      });
+  // Search input
+  const searchInput = document.getElementById('exerciseSearchInput');
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      searchQuery = e.target.value;
       if (onUpdate) onUpdate();
     });
   }
 
-  // Finish Workout
-  const finishBtn = document.getElementById('btnFinishWorkout');
+  // Add Exercise to Current Day Plan
+  document.querySelectorAll('.btn-add-exercise-to-plan').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.getAttribute('data-id');
+      const name = btn.getAttribute('data-name');
+      const equipment = btn.getAttribute('data-equip');
+
+      const state = getState();
+      const plan = state.workouts[selectedDayKey];
+      const newEx = {
+        id: 'ex_' + Date.now(),
+        name,
+        sets: 4,
+        reps: '10',
+        weight: equipment === 'bodyweight' ? 'Vücut Ağ.' : '15 kg',
+        equipment
+      };
+
+      const updatedPlan = { ...plan, exercises: [...plan.exercises, newEx] };
+      updateState({
+        workouts: { ...state.workouts, [selectedDayKey]: updatedPlan }
+      });
+
+      playQuestCompleteSound();
+      triggerHaptic('success');
+      alert(`✅ "${name}" hareketi ${DAYS.find(d => d.key === selectedDayKey)?.label} gününe eklendi!`);
+
+      if (onUpdate) onUpdate();
+    });
+  });
+
+  // Finish Workout Action
+  const finishBtn = document.getElementById('btnFinishDayWorkout');
   if (finishBtn) {
     finishBtn.addEventListener('click', () => {
       stopRestTimer();
@@ -212,17 +329,21 @@ export function attachWorkoutListeners(onUpdate) {
       triggerHaptic('heavy');
 
       const state = getState();
-      const bossDmg = 80;
-      const newHp = Math.max(0, state.bossHp - bossDmg);
+      // Mark workout habit completed
+      const updatedHabits = state.todayHabits.map(h => {
+        if (h.id === 'q_workout') {
+          return { ...h, current: 45, completed: true };
+        }
+        return h;
+      });
 
+      damageBoss(50);
       addXP(50, 'STR');
-      addXP(25, 'VIT');
 
-      alert(`💥 TEBRİKLER! Antrenman başarıyla tamamlandı. Boss'a 80 Fiziksel Kritik Hasar vuruldu, +50 STR ve +25 VIT XP kazanıldı!`);
+      alert(`💥 TEBRİKLER! Antrenman başarıyla mühürlendi. Boss'a 50 Fiziksel Hasar vuruldu ve +50 STR XP kazanıldı!`);
 
       updateState({
-        bossHp: newHp,
-        activeModal: null
+        todayHabits: updatedHabits
       });
 
       if (onUpdate) onUpdate();
@@ -244,7 +365,7 @@ function startRestTimer(seconds) {
       stopRestTimer();
       playWhistleSound();
       triggerHaptic('heavy');
-      if (disp) disp.textContent = 'Dinlenme Bitti! Yeni Sete Başla 🔥';
+      if (disp) disp.textContent = 'Yeni Sete Başla 🔥';
     }
   }, 1000);
 }

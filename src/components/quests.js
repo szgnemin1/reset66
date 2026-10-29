@@ -1,131 +1,179 @@
 /**
- * Daily Quests & Bento Mini Tools Hub (Tab 1: Bugün)
- * Replicates Life Reset's core quest checklist with gamified RPG toggles.
+ * Daily Quests & Actions Hub (Tab 1: Bugün / İlk Sayfa)
+ * Vertical daily checklist (Koşu, Spor, Kitap, Meditasyon, Su, Soğuk Duş).
+ * Every completed action directly damages the Boss in real time!
+ * 1-Tap Smart Band Sync automatically completes the running distance quest!
  */
 
-import { getState, updateState, addXP } from '../services/storage.js';
+import { getState, updateState, addXP, damageBoss, completeDaySuccessfully, triggerMissedDayPenalty } from '../services/storage.js';
 import { PILLARS } from '../data/constants.js';
 import { triggerHaptic } from '../services/haptics.js';
-import { playQuestCompleteSound, playLevelUpSound, playClickSound } from '../services/audio.js';
+import { playQuestCompleteSound, playBossHitSound, playLevelUpSound, playClickSound } from '../services/audio.js';
+import { oneTapSyncSmartBand } from '../services/bluetooth.js';
 
 export function renderQuestsTab() {
   const state = getState();
   const completedCount = state.todayHabits.filter(h => h.completed).length;
   const totalCount = state.todayHabits.length;
   const progressPct = Math.round((completedCount / totalCount) * 100);
+  const sleep = state.sleepData;
 
   return `
     <div class="space-y-4 animate-fadeIn">
       
-      <!-- Bento Quick Action Bar (Mini Tools Shortcuts) -->
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-        
-        <!-- Tool 1: Meditation -->
-        <button type="button" class="btn-open-tool p-3 rounded-2xl bg-gradient-to-br from-purple-950/40 to-slate-900 border border-purple-500/30 text-left transition hover:border-purple-500/70 hover:scale-[1.02] shadow-sm group" data-tool="meditation">
-          <div class="flex items-center justify-between">
-            <span class="text-xl">🧘</span>
-            <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 font-bold">ZİHİN</span>
+      <!-- 1-Tap Smart Band Sync Bar -->
+      <div class="p-3.5 rounded-2xl bg-gradient-to-r from-cyan-950/50 via-slate-900 to-purple-950/40 border border-cyan-500/40 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div class="flex items-center gap-3 w-full sm:w-auto">
+          <div class="w-10 h-10 rounded-xl bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 flex items-center justify-center text-xl shrink-0">
+            ⌚
           </div>
-          <span class="block text-xs font-bold text-white mt-1.5 group-hover:text-purple-300">Meditasyon</span>
-          <span class="text-[10px] text-slate-400">4 Ritim & Frekanslar</span>
-        </button>
-
-        <!-- Tool 2: Workout -->
-        <button type="button" class="btn-open-tool p-3 rounded-2xl bg-gradient-to-br from-amber-950/40 to-slate-900 border border-amber-500/30 text-left transition hover:border-amber-500/70 hover:scale-[1.02] shadow-sm group" data-tool="workout">
-          <div class="flex items-center justify-between">
-            <span class="text-xl">🏋️</span>
-            <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold">GÜÇ</span>
+          <div class="min-w-0 flex-1">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold text-white">Akıllı Saat & Bileklik Senkronizasyonu</span>
+              <span id="liveHeartRatePill" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 font-bold shrink-0">
+                ❤️ ${sleep.restingHr} BPM
+              </span>
+            </div>
+            <p id="smartBandSyncText" class="text-[10px] text-slate-400 truncate mt-0.5">
+              ${sleep.connected ? `Bağlı: ${sleep.deviceName} • ${sleep.lastDistanceKm} KM Koşuldu • %${sleep.qualityScore} Uyku` : 'Mi Band, Galaxy Watch, Health Connect otomatik veri çek.'}
+            </p>
           </div>
-          <span class="block text-xs font-bold text-white mt-1.5 group-hover:text-amber-300">Antrenman</span>
-          <span class="text-[10px] text-slate-400">Set & Dinlenme Sayacı</span>
-        </button>
+        </div>
 
-        <!-- Tool 3: Focus Pomodoro -->
-        <button type="button" class="btn-open-tool p-3 rounded-2xl bg-gradient-to-br from-indigo-950/40 to-slate-900 border border-indigo-500/30 text-left transition hover:border-indigo-500/70 hover:scale-[1.02] shadow-sm group" data-tool="pomodoro">
-          <div class="flex items-center justify-between">
-            <span class="text-xl">⏱️</span>
-            <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-bold">ODAK</span>
-          </div>
-          <span class="block text-xs font-bold text-white mt-1.5 group-hover:text-indigo-300">Pürdikkat</span>
-          <span class="text-[10px] text-slate-400">25 Dk Derin Blok</span>
+        <button type="button" id="btnOneTapSync" class="w-full sm:w-auto px-4 py-2 rounded-xl bg-cyan-500 text-black font-black text-xs font-mono tracking-wider uppercase transition hover:brightness-110 active:scale-95 shadow-md shadow-cyan-500/20 shrink-0 flex items-center justify-center gap-1.5">
+          <span>⚡ BİLEKLİĞİ BAĞLA & ÇEK</span>
         </button>
-
-        <!-- Tool 4: Bio-Sync Sleep -->
-        <button type="button" class="btn-open-tool p-3 rounded-2xl bg-gradient-to-br from-cyan-950/40 to-slate-900 border border-cyan-500/30 text-left transition hover:border-cyan-500/70 hover:scale-[1.02] shadow-sm group" data-tool="sleep">
-          <div class="flex items-center justify-between">
-            <span class="text-xl">⌚</span>
-            <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-bold">BİYO-SENK</span>
-          </div>
-          <span class="block text-xs font-bold text-white mt-1.5 group-hover:text-cyan-300">Uyku & Nabız</span>
-          <span class="text-[10px] text-slate-400" id="bentoSleepStatus">${state.sleepData.hasRestBuff ? '⚡ +%15 XP Buff' : 'Senkronize Et'}</span>
-        </button>
-
       </div>
 
-      <!-- Daily Quests Section Header -->
+      <!-- Boss Real-Time Target Preview Banner -->
+      <div class="p-3 rounded-2xl bg-slate-950/90 border border-rose-500/40 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <span class="text-xl">👾</span>
+          <div>
+            <div class="flex items-center gap-1.5">
+              <span class="text-[10px] font-mono uppercase text-rose-400 font-bold">HEDEF BOSS:</span>
+              <span class="text-xs font-bold text-white">${state.bossIsEnraged ? '🔥 [ÖFKELİ X2] ' : ''}Gölge Patron</span>
+            </div>
+            <span class="text-[10px] text-slate-400">Her tamamlanan görev bosstan anlık can götürür!</span>
+          </div>
+        </div>
+        <div class="text-right">
+          <span class="text-xs font-mono font-bold text-rose-400">${state.bossHp} / ${state.bossMaxHp} HP</span>
+          <div class="w-24 h-1.5 rounded-full bg-slate-900 border border-slate-800 overflow-hidden mt-1">
+            <div class="h-full bg-rose-500 transition-all duration-300" style="width: ${Math.round((state.bossHp / state.bossMaxHp) * 100)}%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Daily Quests Vertical Header -->
       <div class="flex items-center justify-between pt-1">
         <div>
           <h2 class="text-xs font-mono font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
-            <span>⚔️ GÜNLÜK GÖREVLER (DAILY QUESTS)</span>
+            <span>📋 GÜNÜN PROTOKOLÜ (YAPILACAKLAR)</span>
           </h2>
-          <span class="text-[11px] text-slate-400">Gece 00:00 olmadan tamamla, XP ve nitelik kazan.</span>
+          <span class="text-[11px] text-slate-400">Tüm görevleri mühürle, serini koru ve zindanı fethet.</span>
         </div>
         <span class="text-xs font-mono font-bold ${completedCount === totalCount ? 'text-emerald-400' : 'text-slate-400'}">
           ${completedCount}/${totalCount} (%${progressPct})
         </span>
       </div>
 
-      <!-- Quests Cards List -->
+      <!-- Alt Alta Görev Listesi (Vertical Quests List) -->
       <div class="space-y-2.5">
         ${state.todayHabits.map((habit, idx) => {
-          const pillar = PILLARS[habit.pillar] || { name: habit.pillar, color: 'cyan', icon: '⚡' };
           const isDone = habit.completed;
+          let actionBtnText = isDone ? 'TAMAMLANDI ✓' : `-${habit.bossDmg} HP VUR`;
+          let extraActionHtml = '';
+
+          // Specific interactive quick triggers
+          if (habit.id === 'q_run') {
+            extraActionHtml = `
+              <div class="flex items-center gap-1.5 mt-2">
+                <button type="button" class="btn-quick-km px-2 py-0.5 rounded bg-slate-800 text-slate-300 hover:text-white text-[10px] font-mono" data-add="1.0">+1.0 KM</button>
+                <button type="button" class="btn-quick-km px-2 py-0.5 rounded bg-slate-800 text-slate-300 hover:text-white text-[10px] font-mono" data-add="2.5">+2.5 KM</button>
+                <span class="text-[10px] text-cyan-400 font-mono ml-auto">Şu An: ${habit.current || 0} / ${habit.target} KM</span>
+              </div>
+            `;
+          } else if (habit.id === 'q_workout') {
+            extraActionHtml = `
+              <div class="flex items-center gap-1.5 mt-2">
+                <button type="button" class="btn-open-modal-trigger px-2.5 py-0.5 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/30 hover:bg-amber-500/30 text-[10px] font-mono font-bold" data-modal="workout">
+                  🏋️ Antrenman Modunu Aç ➔
+                </button>
+              </div>
+            `;
+          } else if (habit.id === 'q_reading') {
+            extraActionHtml = `
+              <div class="flex items-center gap-1.5 mt-2">
+                <button type="button" class="btn-open-modal-trigger px-2.5 py-0.5 rounded-lg bg-purple-500/20 text-purple-300 border border-purple-500/30 hover:bg-purple-500/30 text-[10px] font-mono font-bold" data-modal="reader">
+                  📖 Dahili Kütüphaneden Oku ➔
+                </button>
+              </div>
+            `;
+          } else if (habit.id === 'q_meditation') {
+            extraActionHtml = `
+              <div class="flex items-center gap-1.5 mt-2">
+                <button type="button" class="btn-open-modal-trigger px-2.5 py-0.5 rounded-lg bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 hover:bg-cyan-500/30 text-[10px] font-mono font-bold" data-modal="meditation">
+                  🧘 Nefes Stüdyosunu Aç ➔
+                </button>
+              </div>
+            `;
+          }
 
           return `
-            <div class="p-3.5 rounded-2xl border transition-all duration-300 flex items-center justify-between gap-3 ${isDone ? 'bg-emerald-950/20 border-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.1)]' : 'bg-slate-900/80 border-slate-800 hover:border-slate-700'}">
+            <div class="p-3.5 rounded-2xl border transition-all duration-300 ${isDone ? 'bg-emerald-950/20 border-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.1)]' : 'bg-slate-900/80 border-slate-800 hover:border-slate-700'}">
               
-              <!-- Left Info -->
-              <div class="flex items-center gap-3 min-w-0">
-                <span class="text-2xl shrink-0">${pillar.icon}</span>
-                <div class="min-w-0">
-                  <div class="flex items-center gap-2">
-                    <span class="text-xs font-bold ${isDone ? 'line-through text-slate-400' : 'text-white'} truncate">
-                      ${habit.title}
-                    </span>
-                    <span class="text-[9px] font-mono px-1.5 py-0.2 rounded bg-slate-800 text-slate-300 font-bold shrink-0">
-                      ${pillar.name}
-                    </span>
+              <div class="flex items-center justify-between gap-3">
+                <!-- Left Title & Description -->
+                <div class="flex items-center gap-3 min-w-0">
+                  <span class="text-2xl shrink-0">${habit.icon}</span>
+                  <div class="min-w-0">
+                    <div class="flex items-center gap-2">
+                      <span class="text-xs font-bold ${isDone ? 'line-through text-slate-400' : 'text-white'} truncate">
+                        ${habit.title}
+                      </span>
+                      <span class="text-[9px] font-mono px-1.5 py-0.2 rounded bg-slate-800 text-cyan-400 font-bold shrink-0">
+                        +${habit.xp} XP
+                      </span>
+                    </div>
+                    <p class="text-[11px] text-slate-400 leading-tight truncate mt-0.5">
+                      ${habit.desc}
+                    </p>
                   </div>
-                  <p class="text-[11px] text-slate-400 leading-tight truncate mt-0.5">
-                    ${habit.desc}
-                  </p>
                 </div>
+
+                <!-- Right Damage Action Button -->
+                <button type="button" class="btn-toggle-habit shrink-0 px-3 py-2 rounded-xl border text-xs font-mono font-bold transition flex items-center gap-1 ${isDone ? 'bg-emerald-500 text-black border-emerald-400' : 'bg-slate-950 text-rose-400 border-rose-500/40 hover:bg-rose-500/20 active:scale-95'}" data-idx="${idx}">
+                  <span>${actionBtnText}</span>
+                </button>
               </div>
 
-              <!-- Right Checkbox Toggle -->
-              <button type="button" class="btn-toggle-habit shrink-0 px-3 py-2 rounded-xl border text-xs font-mono font-bold transition flex items-center gap-1.5 ${isDone ? 'bg-emerald-500 text-black border-emerald-400 shadow-md shadow-emerald-500/20' : 'bg-slate-950 text-cyan-400 border-cyan-500/40 hover:bg-cyan-500/20'}" data-idx="${idx}">
-                <span>${isDone ? 'TAMAMLANDI ✓' : `+${habit.xp} XP`}</span>
-              </button>
+              <!-- Extra Dynamic Actions (Reading trigger, Workout launcher, KM adder) -->
+              ${extraActionHtml}
 
             </div>
           `;
         }).join('')}
       </div>
 
-      <!-- Hard Mode & Finish Day Row -->
-      <div class="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3">
-        <div class="flex items-center gap-3">
-          <button type="button" id="btnToggleHardMode" class="px-3 py-1.5 rounded-xl border text-xs font-mono font-bold transition ${state.hardMode ? 'bg-rose-500/20 text-rose-300 border-rose-500/60 shadow-[0_0_10px_rgba(244,63,94,0.3)]' : 'bg-slate-950 text-slate-400 border-slate-800'}">
-            ☠️ Zor Mod: ${state.hardMode ? 'AÇIK (Tavizsiz)' : 'KAPALI'}
-          </button>
-          <span class="text-[11px] text-slate-400">
-            ${state.hardMode ? '%70 altı tamamlamada -40 XP & Seri Sıfırlanır.' : 'Standart alışkanlık takibi modu.'}
-          </span>
+      <!-- Day Completion & Missed Day Penalty Actions -->
+      <div class="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-3">
+        <div class="flex items-center justify-between text-xs font-mono">
+          <span class="text-slate-300 font-bold">Günün Sonlandırma Protokolü:</span>
+          <span class="text-slate-400">Zor Mod: ${state.hardMode ? 'Açık' : 'Kapalı'}</span>
         </div>
 
-        <button type="button" id="btnCompleteDay" class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 via-purple-500 to-cyan-400 text-black font-black text-xs font-mono tracking-wider uppercase transition hover:brightness-110 active:scale-95 shadow-[0_0_20px_rgba(6,182,212,0.4)]">
-          GÜNÜ MÜHÜRLE & BOSS'A SALDIR ⚔️
-        </button>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <!-- Success Seal -->
+          <button type="button" id="btnSealDaySuccess" class="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-500 via-purple-500 to-cyan-400 hover:brightness-110 active:scale-95 text-black font-black text-xs font-mono tracking-wider uppercase transition shadow-[0_0_20px_rgba(6,182,212,0.4)]">
+            ✅ GÜNÜ MÜHÜRLE (ZİNCİRİ KORU)
+          </button>
+
+          <!-- Missed Day Penalty Trigger -->
+          <button type="button" id="btnSkipDayPenalty" class="w-full py-3 rounded-xl bg-slate-950 border border-rose-500/50 hover:bg-rose-950/30 active:scale-95 text-rose-400 font-bold text-xs font-mono tracking-wider uppercase transition">
+            ⚠️ GÜNÜ ATLA (BOSS X2 GÜÇLENİR & -1 ❤️)
+          </button>
+        </div>
       </div>
 
     </div>
@@ -133,18 +181,61 @@ export function renderQuestsTab() {
 }
 
 export function attachQuestsListeners(onUpdate) {
-  // Mini Tools Launcher buttons
-  document.querySelectorAll('.btn-open-tool').forEach(btn => {
+  // 1-Tap Smart Band Sync
+  const syncBtn = document.getElementById('btnOneTapSync');
+  if (syncBtn) {
+    syncBtn.addEventListener('click', () => {
+      const syncTextEl = document.getElementById('smartBandSyncText');
+      oneTapSyncSmartBand((statusMsg) => {
+        if (syncTextEl) syncTextEl.textContent = statusMsg;
+        if (onUpdate) onUpdate();
+      });
+    });
+  }
+
+  // Quick KM button
+  document.querySelectorAll('.btn-quick-km').forEach(btn => {
     btn.addEventListener('click', () => {
-      const tool = btn.getAttribute('data-tool');
-      playClickSound();
-      triggerHaptic('light');
-      updateState({ activeModal: tool });
+      const addVal = parseFloat(btn.getAttribute('data-add'));
+      const state = getState();
+      const updatedHabits = state.todayHabits.map(h => {
+        if (h.id === 'q_run') {
+          const newCurrent = parseFloat(((h.current || 0) + addVal).toFixed(1));
+          const isDone = newCurrent >= h.target;
+          if (isDone && !h.completed) {
+            damageBoss(h.bossDmg);
+            addXP(h.xp, h.pillar);
+            playQuestCompleteSound();
+            triggerHaptic('success');
+          } else {
+            playClickSound();
+            triggerHaptic('light');
+          }
+          return { ...h, current: newCurrent, completed: isDone };
+        }
+        return h;
+      });
+      updateState({ todayHabits: updatedHabits });
       if (onUpdate) onUpdate();
     });
   });
 
-  // Toggle Habit checkboxes
+  // Modal & Tab Triggers (Reader, Workout, Meditation)
+  document.querySelectorAll('.btn-open-modal-trigger').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const modal = btn.getAttribute('data-modal');
+      playClickSound();
+      triggerHaptic('light');
+      if (modal === 'workout' || modal === 'workoutTab' || modal === 'workoutModal') {
+        updateState({ activeTab: 'workout', activeModal: null });
+      } else {
+        updateState({ activeModal: modal });
+      }
+      if (onUpdate) onUpdate();
+    });
+  });
+
+  // Toggle Habit checkboxes with Direct Boss Damage
   document.querySelectorAll('.btn-toggle-habit').forEach(btn => {
     btn.addEventListener('click', () => {
       const idx = Number(btn.getAttribute('data-idx'));
@@ -156,9 +247,11 @@ export function attachQuestsListeners(onUpdate) {
       updatedHabits[idx] = { ...habit, completed: newDone };
 
       if (newDone) {
-        playQuestCompleteSound();
-        triggerHaptic('medium');
+        playBossHitSound();
+        triggerHaptic('heavy');
+        damageBoss(habit.bossDmg);
         addXP(habit.xp, habit.pillar);
+        alert(`💥 KRİTİK HASAR! ${habit.title} tamamlandı. Boss'a ${habit.bossDmg} Hasar vuruldu, +${habit.xp} XP kazanıldı!`);
       } else {
         playClickSound();
         triggerHaptic('light');
@@ -169,55 +262,38 @@ export function attachQuestsListeners(onUpdate) {
     });
   });
 
-  // Toggle Hard Mode
-  const hardBtn = document.getElementById('btnToggleHardMode');
-  if (hardBtn) {
-    hardBtn.addEventListener('click', () => {
-      const state = getState();
-      playClickSound();
-      triggerHaptic('medium');
-      updateState({ hardMode: !state.hardMode });
-      if (onUpdate) onUpdate();
-    });
-  }
-
-  // Complete Day
-  const compBtn = document.getElementById('btnCompleteDay');
-  if (compBtn) {
-    compBtn.addEventListener('click', () => {
+  // Seal Day Success
+  const sealBtn = document.getElementById('btnSealDaySuccess');
+  if (sealBtn) {
+    sealBtn.addEventListener('click', () => {
       const state = getState();
       const completedCount = state.todayHabits.filter(h => h.completed).length;
-      const totalCount = state.todayHabits.length;
-      const pct = (completedCount / totalCount);
-
-      if (state.hardMode && pct < 0.7) {
-        triggerHaptic('error');
-        alert(`☠️ ZOR MOD CEZASI: Görevlerin %70'ini tamamlamadın! Serin sıfırlandı ve 40 XP kaybettin.`);
-        updateState({
-          streak: 1,
-          xp: Math.max(0, state.xp - 40),
-          hearts: Math.max(0, state.hearts - 1)
-        });
-        if (onUpdate) onUpdate();
+      if (completedCount < 3) {
+        alert('⚠️ En az 3 görevi tamamlamadan günü mühürleyemezsiniz!');
         return;
       }
 
       playLevelUpSound();
       triggerHaptic('success');
-      alert(`🎉 Tebrikler Avcı! Gün ${state.currentDay} başarıyla mühürlendi. Boss zindanına ilerleniyor.`);
-      
-      const nextDay = Math.min(66, state.currentDay + 1);
-      const nextStreak = state.streak + 1;
-      const resetHabits = state.todayHabits.map(h => ({ ...h, completed: false }));
-
-      updateState({
-        currentDay: nextDay,
-        streak: nextStreak,
-        todayHabits: resetHabits,
-        activeTab: 'roadmap' // Navigate to roadmap to view boss damage
-      });
-
+      alert(`🎉 TEBRİKLER! Gün ${state.currentDay} başarıyla mühürlendi. Zinciri kırmadın, yarınki zindana ilerleniyor!`);
+      completeDaySuccessfully();
+      updateState({ activeTab: 'boss' });
       if (onUpdate) onUpdate();
+    });
+  }
+
+  // Skip Day Penalty
+  const skipBtn = document.getElementById('btnSkipDayPenalty');
+  if (skipBtn) {
+    skipBtn.addEventListener('click', () => {
+      if (confirm('⚠️ UYARI: Bir gün atlandığında Boss X2 Güçlenecek (Berserk Modu) ve 1 Canınız (-1 ❤️) azalacak. Onaylıyor musunuz?')) {
+        playBossHitSound();
+        triggerHaptic('error');
+        const res = triggerMissedDayPenalty();
+        alert(`☠️ GÜN ATLANDI! Boss x2 Güçlendi (${res.enragedHp} HP) ve Canınız Azaldı (Kalan: ${res.newHearts} ❤️)! Zincir haritasında kırmızı mühür vuruldu.`);
+        updateState({ activeTab: 'boss' });
+        if (onUpdate) onUpdate();
+      }
     });
   }
 }

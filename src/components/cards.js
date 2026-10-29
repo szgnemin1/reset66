@@ -1,15 +1,15 @@
 /**
- * Mindset Cards & 10 Scientific Masterwork Book Summaries
- * 3D Flip animations, category filters, high-impact cognitive reframing.
+ * Mindset Cards & Built-in In-App E-Book Reader Launcher (Tab 4: Kitaplık & Zihin)
+ * 3D Flip animations, category filters, and built-in stoic masterworks reader.
  */
 
 import { MANTRA_CARDS, BOOK_SUMMARIES } from '../data/constants.js';
-import { getState, updateState, addXP } from '../services/storage.js';
-import { playClickSound, playQuestCompleteSound } from '../services/audio.js';
+import { IN_APP_BOOKS } from '../data/library.js';
+import { getState, updateState } from '../services/storage.js';
+import { playClickSound } from '../services/audio.js';
 import { triggerHaptic } from '../services/haptics.js';
 
 let selectedCategory = 'Tümü';
-let selectedBook = null;
 
 const CATEGORIES = ['Tümü', 'Disiplin', 'İrade', 'Odak', 'Güç', 'Bilgelik', 'Özgüven', 'Stoacılık'];
 
@@ -21,17 +21,33 @@ export function renderCardsTab() {
   return `
     <div class="space-y-4 animate-fadeIn">
       
-      <!-- Section Header -->
+      <!-- In-App Library Reader Featured Banner -->
+      <div class="p-5 rounded-3xl bg-gradient-to-r from-purple-950/60 via-slate-900 to-cyan-950/40 border border-purple-500/40 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <span class="text-3xl">📖</span>
+          <div>
+            <span class="text-[10px] font-mono uppercase text-purple-400 font-bold tracking-widest">[ DAHİLİ E-KİTAP KÜTÜPHANESİ ]</span>
+            <h3 class="text-sm font-black text-white">ÜCRETSİZ BAŞYAPITLARI OKU</h3>
+            <p class="text-[11px] text-slate-300 mt-0.5">Marcus Aurelius, Epiktetos, Seneka ve Sun Tzu tam bölümler.</p>
+          </div>
+        </div>
+
+        <button type="button" id="btnLaunchInAppReader" class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-purple-500 text-black font-black text-xs font-mono tracking-wider uppercase transition hover:brightness-110 active:scale-95 shadow-md shadow-purple-500/20 shrink-0 flex items-center justify-center gap-1.5">
+          <span>📚 KİTABI AÇ & OKU ➔</span>
+        </button>
+      </div>
+
+      <!-- Quick 10 Masterwork Summaries Modal Trigger -->
       <div class="flex items-center justify-between">
         <div>
           <h2 class="text-xs font-mono font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
-            <span>🃏 ZİHİN KARTLARI & KİTAPLIK</span>
+            <span>🃏 ZİHİN KARTLARI & ÖZETLER</span>
           </h2>
-          <span class="text-[11px] text-slate-400">Bilişsel Yeniden Çerçeveleme (CBT) & 10 Başyapıt Özeti</span>
+          <span class="text-[11px] text-slate-400">Bilişsel Yeniden Çerçeveleme (CBT) & 10 Bilim Kitap Özeti</span>
         </div>
 
-        <button type="button" id="btnOpenBooksModal" class="px-3 py-1.5 rounded-xl bg-purple-500/20 border border-purple-500/40 text-purple-300 text-xs font-mono font-bold hover:bg-purple-500/30 transition flex items-center gap-1.5">
-          <span>📚 10 Kitap Özeti</span>
+        <button type="button" id="btnOpenBooksModal" class="px-3 py-1.5 rounded-xl bg-slate-950 border border-purple-500/40 text-purple-300 text-xs font-mono font-bold hover:bg-purple-950/30 transition flex items-center gap-1">
+          <span>📋 10 Kitap Özeti</span>
         </button>
       </div>
 
@@ -142,6 +158,17 @@ export function renderBooksModal() {
 }
 
 export function attachCardsListeners(onUpdate) {
+  // Launch Reader
+  const readerBtn = document.getElementById('btnLaunchInAppReader');
+  if (readerBtn) {
+    readerBtn.addEventListener('click', () => {
+      playClickSound();
+      triggerHaptic('light');
+      updateState({ activeModal: 'reader' });
+      if (onUpdate) onUpdate();
+    });
+  }
+
   // Category filter
   document.querySelectorAll('.btn-filter-category').forEach(btn => {
     btn.addEventListener('click', () => {

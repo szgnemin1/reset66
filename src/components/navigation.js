@@ -1,6 +1,6 @@
 /**
  * Floating Glassmorphic Bottom Navigation Dock
- * Authentic mobile navigation bar with glowing indicators.
+ * 5 Clean Core Tabs: Bugün, Boss & Harita, Spor Programı, Kitaplık & Zihin, Ayarlar
  */
 
 import { getState, updateState } from '../services/storage.js';
@@ -9,10 +9,10 @@ import { triggerHaptic } from '../services/haptics.js';
 
 const TABS = [
   { id: 'quests', label: 'Bugün', icon: '📋' },
-  { id: 'roadmap', label: 'Harita', icon: '🗺️' },
-  { id: 'tools', label: 'Stüdyo', icon: '🧰' },
-  { id: 'cards', label: 'Zihin', icon: '🃏' },
-  { id: 'profile', label: 'Profil', icon: '👤' }
+  { id: 'boss', label: 'Boss & Harita', icon: '👾' },
+  { id: 'workout', label: 'Spor', icon: '🏋️' },
+  { id: 'library', label: 'Kitaplık', icon: '📖' },
+  { id: 'settings', label: 'Ayarlar', icon: '⚙️' }
 ];
 
 export function renderBottomNav() {
@@ -24,9 +24,9 @@ export function renderBottomNav() {
         ${TABS.map(tab => {
           const isActive = state.activeTab === tab.id;
           return `
-            <button type="button" class="btn-bottom-tab flex-1 py-1.5 px-2 rounded-2xl flex flex-col items-center justify-center transition-all duration-200 group ${isActive ? 'bg-cyan-500/15 text-cyan-400 font-bold shadow-inner' : 'text-slate-400 hover:text-slate-200'}" data-tab="${tab.id}">
+            <button type="button" class="btn-bottom-tab flex-1 py-1.5 px-1.5 rounded-2xl flex flex-col items-center justify-center transition-all duration-200 group ${isActive ? 'bg-cyan-500/15 text-cyan-400 font-bold shadow-inner' : 'text-slate-400 hover:text-slate-200'}" data-tab="${tab.id}">
               <span class="text-lg leading-none transition-transform group-hover:scale-110 ${isActive ? 'scale-110' : ''}">${tab.icon}</span>
-              <span class="text-[10px] font-mono mt-0.5 tracking-tight ${isActive ? 'text-cyan-300 font-bold' : 'text-slate-400'}">${tab.label}</span>
+              <span class="text-[9px] font-mono mt-0.5 tracking-tight ${isActive ? 'text-cyan-300 font-bold' : 'text-slate-400'}">${tab.label}</span>
             </button>
           `;
         }).join('')}

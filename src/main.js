@@ -1,22 +1,26 @@
 /**
  * Reset66 (Life Reset: 66 Day Habit RPG)
  * Main Application Orchestrator & Component Renderer
+ * Integrates 5 Core Tabs: Bugün, Boss & Harita, Spor Programı, Kitaplık, Ayarlar
  */
 
 import './styles/main.css';
 
 import { loadState, getState, subscribe } from './services/storage.js';
 import { renderHeader } from './components/header.js';
-import { renderQuestsTab, attachQuestsListeners } from './components/quests.js';
-import { renderRoadmapTab, attachRoadmapListeners } from './components/roadmap.js';
-import { renderToolsTab, attachToolsListeners } from './components/tools.js';
-import { renderCardsTab, renderBooksModal, attachCardsListeners } from './components/cards.js';
-import { renderProfileTab, attachProfileListeners } from './components/profile.js';
 import { renderBottomNav, attachNavListeners } from './components/navigation.js';
 
+// 5 Core Tabs
+import { renderQuestsTab, attachQuestsListeners } from './components/quests.js';
+import { renderBossTab, attachBossListeners } from './components/boss.js';
+import { renderWorkoutTab, attachWorkoutListeners } from './components/workout.js';
+import { renderCardsTab, renderBooksModal, attachCardsListeners } from './components/cards.js';
+import { renderSettingsTab, attachSettingsListeners } from './components/settings.js';
+
+// Interactive Modals
+import { renderReaderModal, attachReaderListeners } from './components/reader.js';
 import { renderOnboardingModal, attachOnboardingListeners } from './components/onboarding.js';
 import { renderMeditationModal, attachMeditationListeners } from './components/meditation.js';
-import { renderWorkoutModal, attachWorkoutListeners } from './components/workout.js';
 import { renderFocusModal, attachFocusListeners } from './components/focus.js';
 import { renderSleepModal, attachSleepListeners } from './components/sleep.js';
 import { checkAndPromptUpdate } from './services/updater.js';
@@ -30,25 +34,27 @@ function renderApp() {
   let tabBodyHtml = '';
   if (state.activeTab === 'quests') {
     tabBodyHtml = renderQuestsTab();
-  } else if (state.activeTab === 'roadmap') {
-    tabBodyHtml = renderRoadmapTab();
-  } else if (state.activeTab === 'tools') {
-    tabBodyHtml = renderToolsTab();
-  } else if (state.activeTab === 'cards') {
+  } else if (state.activeTab === 'boss') {
+    tabBodyHtml = renderBossTab();
+  } else if (state.activeTab === 'workout') {
+    tabBodyHtml = renderWorkoutTab();
+  } else if (state.activeTab === 'library' || state.activeTab === 'cards') {
     tabBodyHtml = renderCardsTab();
-  } else if (state.activeTab === 'profile') {
-    tabBodyHtml = renderProfileTab();
+  } else if (state.activeTab === 'settings') {
+    tabBodyHtml = renderSettingsTab();
+  } else {
+    tabBodyHtml = renderQuestsTab();
   }
 
   // Active Modals
   let modalHtml = '';
   if (!state.onboardingDone || state.activeModal === 'assessment') {
     modalHtml = renderOnboardingModal();
+  } else if (state.activeModal === 'reader') {
+    modalHtml = renderReaderModal();
   } else if (state.activeModal === 'meditation') {
     modalHtml = renderMeditationModal();
-  } else if (state.activeModal === 'workout') {
-    modalHtml = renderWorkoutModal();
-  } else if (state.activeModal === 'pomodoro') {
+  } else if (state.activeModal === 'focus' || state.activeModal === 'pomodoro') {
     modalHtml = renderFocusModal();
   } else if (state.activeModal === 'sleep') {
     modalHtml = renderSleepModal();
@@ -82,29 +88,30 @@ function renderApp() {
     </div>
   `;
 
-  // Attach active listeners
+  // Attach navigation listeners
   attachNavListeners(renderApp);
 
+  // Attach active tab listeners
   if (state.activeTab === 'quests') {
     attachQuestsListeners(renderApp);
-  } else if (state.activeTab === 'roadmap') {
-    attachRoadmapListeners(renderApp);
-  } else if (state.activeTab === 'tools') {
-    attachToolsListeners(renderApp);
-  } else if (state.activeTab === 'cards') {
+  } else if (state.activeTab === 'boss') {
+    attachBossListeners(renderApp);
+  } else if (state.activeTab === 'workout') {
+    attachWorkoutListeners(renderApp);
+  } else if (state.activeTab === 'library' || state.activeTab === 'cards') {
     attachCardsListeners(renderApp);
-  } else if (state.activeTab === 'profile') {
-    attachProfileListeners(renderApp);
+  } else if (state.activeTab === 'settings') {
+    attachSettingsListeners(renderApp);
   }
 
   // Attach modal listeners if any modal is active
   if (!state.onboardingDone || state.activeModal === 'assessment') {
     attachOnboardingListeners(renderApp);
+  } else if (state.activeModal === 'reader') {
+    attachReaderListeners(renderApp);
   } else if (state.activeModal === 'meditation') {
     attachMeditationListeners(renderApp);
-  } else if (state.activeModal === 'workout') {
-    attachWorkoutListeners(renderApp);
-  } else if (state.activeModal === 'pomodoro') {
+  } else if (state.activeModal === 'focus' || state.activeModal === 'pomodoro') {
     attachFocusListeners(renderApp);
   } else if (state.activeModal === 'sleep') {
     attachSleepListeners(renderApp);
