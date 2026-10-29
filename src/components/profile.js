@@ -7,6 +7,7 @@ import { getState, updateState, resetState, exportStateJSON, importStateJSON } f
 import { PILLARS } from '../data/constants.js';
 import { playClickSound } from '../services/audio.js';
 import { triggerHaptic } from '../services/haptics.js';
+import { CURRENT_VERSION, checkAndPromptUpdate } from '../services/updater.js';
 
 export function renderProfileTab() {
   const state = getState();
@@ -89,6 +90,17 @@ export function renderProfileTab() {
             <span class="text-xs text-slate-300 font-medium">📳 Haptik Titreşim Geri Bildirimi</span>
             <button type="button" id="btnToggleHaptics" class="px-3 py-1 rounded-lg text-xs font-mono font-bold transition ${state.hapticsEnabled ? 'bg-purple-500 text-black' : 'bg-slate-800 text-slate-500'}">
               ${state.hapticsEnabled ? 'AÇIK' : 'KAPALI'}
+            </button>
+          </div>
+
+          <!-- In-App Auto Update Row -->
+          <div class="flex items-center justify-between p-2 rounded-xl bg-slate-950 border border-cyan-500/30">
+            <div>
+              <span class="text-xs text-cyan-300 font-bold block">🔄 Otomatik Güncelleme (GitHub)</span>
+              <span class="text-[10px] text-slate-400 font-mono">Sürüm: ${CURRENT_VERSION} • Açılışta Anlık Kontrol</span>
+            </div>
+            <button type="button" id="btnCheckUpdatesManual" class="px-3 py-1.5 rounded-lg text-xs font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 hover:bg-cyan-500/30 transition">
+              Denetle ➔
             </button>
           </div>
         </div>
@@ -181,6 +193,19 @@ export function attachProfileListeners(onUpdate) {
       triggerHaptic('medium');
       updateState({ hapticsEnabled: !state.hapticsEnabled });
       if (onUpdate) onUpdate();
+    });
+  }
+
+  // Check Updates Manual Button
+  const updateBtn = document.getElementById('btnCheckUpdatesManual');
+  if (updateBtn) {
+    updateBtn.addEventListener('click', () => {
+      playClickSound();
+      triggerHaptic('light');
+      updateBtn.textContent = 'Denetleniyor...';
+      checkAndPromptUpdate(false).finally(() => {
+        updateBtn.textContent = 'Denetle ➔';
+      });
     });
   }
 

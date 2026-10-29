@@ -19,6 +19,7 @@ import { renderMeditationModal, attachMeditationListeners } from './components/m
 import { renderWorkoutModal, attachWorkoutListeners } from './components/workout.js';
 import { renderFocusModal, attachFocusListeners } from './components/focus.js';
 import { renderSleepModal, attachSleepListeners } from './components/sleep.js';
+import { checkAndPromptUpdate } from './services/updater.js';
 
 function renderApp() {
   const state = getState();
@@ -118,5 +119,17 @@ document.addEventListener('DOMContentLoaded', () => {
   renderApp();
   subscribe(() => {
     // Re-render on background state changes if necessary
+  });
+
+  // Real-Time GitHub In-App Auto-Update Check on Startup
+  setTimeout(() => {
+    checkAndPromptUpdate(true);
+  }, 1200);
+
+  // Check again when user returns to app
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      checkAndPromptUpdate(true);
+    }
   });
 });

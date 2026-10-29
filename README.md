@@ -11,7 +11,8 @@
 
 ### 📥 Doğrudan İndirme (Android APK)
 En güncel kararlı sürümü telefonunuza tek tıkla indirin:
-* **[Reset66 v2.0.0 APK İndir (GitHub Release)](https://github.com/szgnemin1/reset66/releases/download/v2.0.0/app-debug.apk)**
+* **[Reset66 v2.1.0 APK İndir (GitHub Release)](https://github.com/szgnemin1/reset66/releases/download/v2.1.0/app-debug.apk)**
+* 🔄 **Otomatik Güncelleme Kuralı:** Uygulama her açılışta arka planda anlık olarak GitHub API'sine bağlanır (`releases/latest`). Yeni sürüm tespit edildiğinde doğrudan uygulama içinden tek tıkla yeni APK'yı indirir ve günceller.
 * Bilimsel altyapı ve hakemli makale incelemeleri için: **[SCIENTIFIC_FOUNDATIONS.md](SCIENTIFIC_FOUNDATIONS.md)**
 * Tersine mühendislik Play Store analizi için: **[LIFE_RESET_REVERSE_ENGINEERING.md](LIFE_RESET_REVERSE_ENGINEERING.md)**
 
