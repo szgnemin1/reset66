@@ -61,7 +61,7 @@ export async function oneTapSyncSmartBand(onStatusCallback) {
   }, 1000);
 }
 
-function finalizeDataSync(deviceName, onStatusCallback) {
+export function finalizeDataSync(deviceName, onStatusCallback) {
   playQuestCompleteSound();
   triggerHaptic('success');
 
@@ -118,6 +118,15 @@ function finalizeDataSync(deviceName, onStatusCallback) {
 export function openGoogleHealthConnect() {
   const healthConnectUri = 'intent:#Intent;package=com.google.android.apps.healthdata;action=androidx.health.ACTION_HEALTH_CONNECT_SETTINGS;end';
   window.location.href = healthConnectUri;
+}
+
+export function openMiFitnessApp() {
+  // Direct Android intent to open Xiaomi Mi Fitness
+  try {
+    window.location.href = 'intent:#Intent;package=com.xiaomi.wearable;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;end';
+  } catch (e) {
+    window.open('https://play.google.com/store/apps/details?id=com.xiaomi.wearable', '_blank');
+  }
 }
 
 export async function scanAndConnectBLE(onDeviceConnected) {

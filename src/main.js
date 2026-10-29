@@ -27,6 +27,7 @@ import { renderSleepModal, attachSleepListeners } from './components/sleep.js';
 import { renderInventoryModal, attachInventoryListeners } from './components/inventory.js';
 import { renderShareCardModal, attachShareCardListeners } from './components/sharecard.js';
 import { renderSoundscapeBar, attachSoundscapeBarListeners } from './components/soundscape_bar.js';
+import { renderMiFitnessModal, attachMiFitnessListeners } from './components/mifitness.js';
 
 // Services
 import { checkAndPromptUpdate } from './services/updater.js';
@@ -62,6 +63,8 @@ function renderApp() {
     modalHtml = renderInventoryModal();
   } else if (state.activeModal === 'sharecard') {
     modalHtml = renderShareCardModal();
+  } else if (state.activeModal === 'mifitness') {
+    modalHtml = renderMiFitnessModal();
   } else if (state.activeModal === 'reader') {
     modalHtml = renderReaderModal();
   } else if (state.activeModal === 'meditation') {
@@ -129,6 +132,8 @@ function renderApp() {
     attachInventoryListeners(renderApp);
   } else if (state.activeModal === 'sharecard') {
     attachShareCardListeners(renderApp);
+  } else if (state.activeModal === 'mifitness') {
+    attachMiFitnessListeners(renderApp);
   } else if (state.activeModal === 'reader') {
     attachReaderListeners(renderApp);
   } else if (state.activeModal === 'meditation') {

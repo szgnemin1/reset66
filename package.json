@@ -1,6 +1,6 @@
 {
   "name": "reset66-lifereset-android",
-  "version": "2.3.0",
+  "version": "2.4.0",
   "type": "module",
   "description": "Reset66 — 66-Day Habit Formation RPG (Open Source Android Life Reset Clone)",
   "main": "www/index.html",

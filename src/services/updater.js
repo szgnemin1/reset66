@@ -6,7 +6,7 @@
 import { triggerHaptic } from './haptics.js';
 import { playLevelUpSound, playClickSound } from './audio.js';
 
-export const CURRENT_VERSION = 'v2.3.0';
+export const CURRENT_VERSION = 'v2.4.0';
 const GITHUB_REPO = 'szgnemin1/reset66';
 const LATEST_RELEASE_API = `https://api.github.com/repos/${GITHUB_REPO}/releases/latest`;
 

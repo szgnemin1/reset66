@@ -21,28 +21,33 @@ export function renderQuestsTab() {
   return `
     <div class="space-y-4 animate-fadeIn">
       
-      <!-- 1-Tap Smart Band Sync Bar -->
-      <div class="p-3.5 rounded-2xl bg-gradient-to-r from-cyan-950/50 via-slate-900 to-purple-950/40 border border-cyan-500/40 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
+      <!-- 1-Tap Mi Fitness & Smart Band Sync Bar -->
+      <div class="p-3.5 rounded-2xl bg-gradient-to-r from-orange-950/40 via-slate-900 to-cyan-950/40 border border-orange-500/40 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
         <div class="flex items-center gap-3 w-full sm:w-auto">
-          <div class="w-10 h-10 rounded-xl bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 flex items-center justify-center text-xl shrink-0">
+          <div class="w-10 h-10 rounded-xl bg-orange-500/20 text-orange-400 border border-orange-500/40 flex items-center justify-center text-xl shrink-0">
             ⌚
           </div>
           <div class="min-w-0 flex-1">
             <div class="flex items-center gap-2">
-              <span class="text-xs font-bold text-white">Akıllı Saat & Bileklik Senkronizasyonu</span>
+              <span class="text-xs font-bold text-white">Mi Fitness & Akıllı Saat Köprüsü</span>
               <span id="liveHeartRatePill" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 font-bold shrink-0">
                 ❤️ ${sleep.restingHr} BPM
               </span>
             </div>
             <p id="smartBandSyncText" class="text-[10px] text-slate-400 truncate mt-0.5">
-              ${sleep.connected ? `Bağlı: ${sleep.deviceName} • ${sleep.lastDistanceKm} KM Koşuldu • %${sleep.qualityScore} Uyku` : 'Mi Band, Galaxy Watch, Health Connect otomatik veri çek.'}
+              ${sleep.connected ? `Bağlı: ${sleep.deviceName} • ${sleep.lastDistanceKm} KM Koşuldu • %${sleep.qualityScore} Uyku` : 'Xiaomi Mi Fitness, Mi Band, Galaxy Watch entegrasyonu'}
             </p>
           </div>
         </div>
 
-        <button type="button" id="btnOneTapSync" class="w-full sm:w-auto px-4 py-2 rounded-xl bg-cyan-500 text-black font-black text-xs font-mono tracking-wider uppercase transition hover:brightness-110 active:scale-95 shadow-md shadow-cyan-500/20 shrink-0 flex items-center justify-center gap-1.5">
-          <span>⚡ BİLEKLİĞİ BAĞLA & ÇEK</span>
-        </button>
+        <div class="flex items-center gap-2 w-full sm:w-auto shrink-0">
+          <button type="button" class="btn-open-modal-trigger flex-1 sm:flex-none px-3.5 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-black font-black text-xs font-mono tracking-wider uppercase transition hover:brightness-110 active:scale-95 shadow-md shrink-0 flex items-center justify-center gap-1.5" data-modal="mifitness">
+            <span>⚡ Mİ FİTNESS'TAN ÇEK</span>
+          </button>
+          <button type="button" id="btnQuickKmInstant" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-cyan-500/30 text-xs font-mono font-bold transition">
+            +5 KM
+          </button>
+        </div>
       </div>
 
       <!-- Boss Real-Time Target Preview Banner -->
@@ -214,6 +219,38 @@ export function attachQuestsListeners(onUpdate) {
         if (syncTextEl) syncTextEl.textContent = statusMsg;
         if (onUpdate) onUpdate();
       });
+    });
+  }
+
+  // Instant +5KM button
+  const quickKmInstantBtn = document.getElementById('btnQuickKmInstant');
+  if (quickKmInstantBtn) {
+    quickKmInstantBtn.addEventListener('click', () => {
+      playQuestCompleteSound();
+      triggerHaptic('success');
+      const state = getState();
+      const km = 5.0;
+      const updatedSleep = {
+        ...state.sleepData,
+        connected: true,
+        deviceName: 'Mi Fitness (+5 KM)',
+        lastDistanceKm: km,
+        lastSteps: 7000,
+        qualityScore: 88,
+        hasRestBuff: true,
+        lastSyncTime: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })
+      };
+      const updatedHabits = state.todayHabits.map(h => {
+        if (h.id === 'q_run') {
+          return { ...h, current: km, completed: true };
+        }
+        return h;
+      });
+      damageBoss(40, 'run');
+      addXP(40, 'VIT');
+      alert('⚡ 5.0 KM Koşu Mühürlendi! Boss\'a 40 Hasar Vuruldu ve +40 VIT XP kazanıldı!');
+      updateState({ sleepData: updatedSleep, todayHabits: updatedHabits });
+      if (onUpdate) onUpdate();
     });
   }
 
