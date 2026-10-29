@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="tr" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#080B11" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="description" content="Reset66 — 66-Day Habit Formation RPG (Open Source Android Life Reset Clone)" />
+  
+  <title>Reset66 — Life Reset: 66 Day Habit RPG</title>
+
+  <!-- Preload local key visual assets -->
+  <link rel="preload" href="./assets/hero.jpg" as="image" />
+  <link rel="preload" href="./assets/boss.jpg" as="image" />
+
+  <style>
+    /* Custom 3D Card Flip & Perspective Styles */
+    .perspective-1000 { perspective: 1000px; }
+    .transform-style-3d { transform-style: preserve-3d; }
+    .backface-hidden { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+    .rotate-y-180 { transform: rotateY(180deg); }
+    .mantra-card-inner.flipped { transform: rotateY(180deg); }
+
+    /* Custom Scrollbar Styles */
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: #080B11; }
+    ::-webkit-scrollbar-thumb { background: #1E293B; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #06B6D4; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fadeIn {
+      animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+  </style>
+</head>
+<body class="bg-[#080B11] text-slate-100 antialiased overflow-x-hidden selection:bg-cyan-500 selection:text-black">
+  <div id="app"></div>
+  <script type="module" src="./main.js"></script>
+</body>
+</html>
